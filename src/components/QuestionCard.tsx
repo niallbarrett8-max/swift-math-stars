@@ -46,7 +46,7 @@ export const QuestionCard = ({
             aria-live="polite"
             className={`min-w-[2ch] inline-block rounded-2xl px-4 py-1 transition-colors ${
               correct
-                ? "bg-success text-success-foreground"
+                ? "gradient-success text-white"
                 : wrong
                   ? "bg-destructive text-destructive-foreground animate-soft-fade"
                   : value
