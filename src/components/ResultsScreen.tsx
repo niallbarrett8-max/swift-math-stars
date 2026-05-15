@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import { ConfettiCelebration } from "./ConfettiCelebration";
 import { Trophy, RotateCcw, Home, Sparkles } from "lucide-react";
 
@@ -8,6 +7,7 @@ interface ResultsScreenProps {
   accuracy: number;
   highScore: number;
   isNewHighScore: boolean;
+  practice: boolean;
   onPlayAgain: () => void;
   onHome: () => void;
 }
@@ -18,14 +18,20 @@ export const ResultsScreen = ({
   accuracy,
   highScore,
   isNewHighScore,
+  practice,
   onPlayAgain,
   onHome,
 }: ResultsScreenProps) => {
+  const showHigh = !practice;
   return (
     <>
-      {isNewHighScore && <ConfettiCelebration />}
-      <div className="w-full max-w-xl gradient-card rounded-3xl shadow-card p-6 sm:p-10 text-center animate-[scale-in_0.3s_ease-out]">
-        {isNewHighScore ? (
+      {(isNewHighScore || (practice && accuracy >= 90)) && <ConfettiCelebration />}
+      <div className="w-full max-w-xl gradient-card rounded-3xl shadow-card p-6 sm:p-10 text-center animate-soft-fade">
+        {practice ? (
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full gradient-secondary text-white font-extrabold text-sm mb-4 shadow-soft">
+            Practice Complete!
+          </div>
+        ) : isNewHighScore ? (
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full gradient-accent text-accent-foreground font-extrabold text-sm mb-4 shadow-glow animate-pulse">
             <Sparkles className="size-4" /> NEW PERSONAL BEST!
           </div>
@@ -51,7 +57,7 @@ export const ResultsScreen = ({
         <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-6">
           <div className="rounded-2xl gradient-primary text-primary-foreground p-4 shadow-soft">
             <div className="text-3xl sm:text-4xl font-extrabold">{score}</div>
-            <div className="text-xs sm:text-sm font-bold opacity-90 mt-1">SCORE</div>
+            <div className="text-xs sm:text-sm font-bold opacity-90 mt-1">CORRECT</div>
           </div>
           <div className="rounded-2xl gradient-secondary text-white p-4 shadow-soft">
             <div className="text-3xl sm:text-4xl font-extrabold">{total}</div>
@@ -63,25 +69,21 @@ export const ResultsScreen = ({
           </div>
         </div>
 
-        <div className="rounded-2xl bg-background border-4 border-border p-4 mb-6 flex items-center justify-center gap-2 font-bold">
-          <Trophy className="size-5 text-accent" />
-          Personal Best: <span className="text-foreground font-extrabold text-lg">{highScore}</span>
-        </div>
+        {showHigh && (
+          <div className="rounded-2xl bg-background border-4 border-border p-4 mb-6 flex items-center justify-center gap-2 font-bold">
+            <Trophy className="size-5 text-accent" />
+            Personal Best:{" "}
+            <span className="text-foreground font-extrabold text-lg">{highScore}</span>
+          </div>
+        )}
 
         <div className="flex flex-col sm:flex-row gap-3">
-          <Button
-            onClick={onPlayAgain}
-            className="flex-1 h-auto text-lg font-extrabold rounded-2xl py-4 gradient-primary text-primary-foreground shadow-glow hover:scale-[1.02] active:scale-95 transition-all border-0"
-          >
-            <RotateCcw className="size-5 mr-2" /> Play Again
-          </Button>
-          <Button
-            onClick={onHome}
-            variant="outline"
-            className="flex-1 h-auto text-lg font-extrabold rounded-2xl py-4 border-4 hover:scale-[1.02] active:scale-95 transition-all"
-          >
-            <Home className="size-5 mr-2" /> Change Settings
-          </Button>
+          <button onClick={onPlayAgain} className="btn-3d flex-1 text-lg py-4">
+            <RotateCcw className="size-5" /> Play Again
+          </button>
+          <button onClick={onHome} className="btn-3d btn-3d-neutral flex-1 text-lg py-4">
+            <Home className="size-5" /> Change Settings
+          </button>
         </div>
       </div>
     </>
