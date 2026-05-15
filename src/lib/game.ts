@@ -23,30 +23,21 @@ export const OP_LABEL: Record<Operation, string> = {
   div: "Division",
 };
 
-// Multiplication / division are always limited to the 12 times tables.
-const MUL_DIV_MAX: Record<Difficulty, number> = {
-  easy: 5,
-  medium: 10,
-  hard: 12,
-};
-
-// Addition / subtraction operand caps (Easy is hard-capped at 10 by spec).
-const ADD_SUB_MAX: Record<Difficulty, number> = {
-  easy: 10,
-  medium: 20,
-  hard: 50,
-};
+const MUL_DIV_MAX: Record<Difficulty, number> = { easy: 5, medium: 10, hard: 12 };
+const ADD_SUB_MAX: Record<Difficulty, number> = { easy: 10, medium: 20, hard: 50 };
 
 export const STORAGE_KEYS = {
-  highScore: "mathstars.highScore.v2", // per op+difficulty key prefix
+  highScore: "mathstars.highScore.v2",
   sound: "mathstars.sound",
   difficulty: "mathstars.difficulty",
   timer: "mathstars.timer",
   operation: "mathstars.operation",
+  practiceOp: "mathstars.practice.op",
+  practiceFamily: "mathstars.practice.family",
 };
 
-export const highScoreKey = (op: Operation, diff: Difficulty) =>
-  `${STORAGE_KEYS.highScore}.${op}.${diff}`;
+export const highScoreKey = (op: Operation, diff: Difficulty, timer: TimerOption) =>
+  `${STORAGE_KEYS.highScore}.${op}.${diff}.${timer}`;
 
 const rand = (lo: number, hi: number) => lo + Math.floor(Math.random() * (hi - lo + 1));
 
@@ -62,11 +53,9 @@ const buildOne = (op: Operation, diff: Difficulty): Question => {
   }
   if (op === "div") {
     const max = MUL_DIV_MAX[diff];
-    // dividend = b * quotient, both 1..max → guarantees clean 12×-table division
     const b = rand(1, max);
     const quotient = rand(1, max);
-    const a = b * quotient;
-    return { a, b, op, answer: quotient };
+    return { a: b * quotient, b, op, answer: quotient };
   }
   if (op === "add") {
     const max = ADD_SUB_MAX[diff];
@@ -74,7 +63,6 @@ const buildOne = (op: Operation, diff: Difficulty): Question => {
     const b = rand(1, max);
     return { a, b, op, answer: a + b };
   }
-  // sub — ensure non-negative
   const max = ADD_SUB_MAX[diff];
   const a = rand(1, max);
   const b = rand(1, a);
@@ -94,26 +82,25 @@ export const generateQuestion = (
 };
 
 export const calcAccuracy = (correct: number, total: number) =>
-  total === 0 ? 0 : Math.round((correct / total) * 100);
+  total === 0 ? 100 : Math.round((correct / total) * 100);
 
-// ---- Practice mode (fact-family ordered sets, no timer) ----
+// Practice fact-family ranges
+export const familyMax = (op: Operation) =>
+  op === "mul" || op === "div" ? 12 : 10;
 
-export const buildPracticeSet = (op: Operation): Question[] => {
+// Build a practice set for one fact family k.
+export const buildPracticeFamily = (op: Operation, k: number): Question[] => {
+  const max = familyMax(op);
   const out: Question[] = [];
   if (op === "add") {
-    for (let k = 1; k <= 10; k++)
-      for (let i = 1; i <= 10; i++) out.push({ a: k, b: i, op, answer: k + i });
+    for (let i = 1; i <= max; i++) out.push({ a: k, b: i, op, answer: k + i });
   } else if (op === "sub") {
-    // family k: (k + i) - i = k, i = 1..10 → answer = k
-    for (let k = 1; k <= 10; k++)
-      for (let i = 1; i <= 10; i++) out.push({ a: k + i, b: i, op, answer: k });
+    // minuend = k + i, subtrahend = i, answer = k (subtraction facts "for k")
+    for (let i = 1; i <= max; i++) out.push({ a: k + i, b: i, op, answer: k });
   } else if (op === "mul") {
-    for (let k = 1; k <= 12; k++)
-      for (let i = 1; i <= 12; i++) out.push({ a: k, b: i, op, answer: k * i });
+    for (let i = 1; i <= max; i++) out.push({ a: k, b: i, op, answer: k * i });
   } else {
-    // div family k: (k * i) ÷ k = i, i = 1..12
-    for (let k = 1; k <= 12; k++)
-      for (let i = 1; i <= 12; i++) out.push({ a: k * i, b: k, op, answer: i });
+    for (let i = 1; i <= max; i++) out.push({ a: k * i, b: k, op, answer: i });
   }
   return out;
 };
