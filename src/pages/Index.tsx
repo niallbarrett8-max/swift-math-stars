@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { SetupScreen, TimerChoice } from "@/components/SetupScreen";
+import { SetupScreen } from "@/components/SetupScreen";
+import { PracticeSetupScreen } from "@/components/PracticeSetupScreen";
 import { GameScreen, GameResult } from "@/components/GameScreen";
 import { ResultsScreen } from "@/components/ResultsScreen";
 import {
@@ -10,7 +11,7 @@ import {
   highScoreKey,
 } from "@/lib/game";
 
-type Screen = "setup" | "game" | "results";
+type Screen = "setup" | "practiceSetup" | "game" | "practice" | "results";
 
 const readNum = (key: string, fallback: number) => {
   if (typeof window === "undefined") return fallback;
@@ -27,17 +28,23 @@ const Index = () => {
   const [difficulty, setDifficulty] = useState<Difficulty>(
     () => (localStorage.getItem(STORAGE_KEYS.difficulty) as Difficulty) || "easy",
   );
-  const [timer, setTimer] = useState<TimerChoice>(() => {
-    const v = localStorage.getItem(STORAGE_KEYS.timer);
-    if (v === "practice") return "practice";
-    const n = Number(v);
+  const [timer, setTimer] = useState<TimerOption>(() => {
+    const n = Number(localStorage.getItem(STORAGE_KEYS.timer));
     return ([30, 60, 120].includes(n) ? n : 60) as TimerOption;
   });
   const [soundOn, setSoundOn] = useState<boolean>(
     () => localStorage.getItem(STORAGE_KEYS.sound) !== "false",
   );
+
+  const [practiceOp, setPracticeOp] = useState<Operation>(
+    () => (localStorage.getItem(STORAGE_KEYS.practiceOp) as Operation) || "mul",
+  );
+  const [practiceFamily, setPracticeFamily] = useState<number>(
+    () => readNum(STORAGE_KEYS.practiceFamily, 2),
+  );
+
   const [highScore, setHighScore] = useState<number>(() =>
-    readNum(highScoreKey(operation, difficulty), 0),
+    readNum(highScoreKey(operation, difficulty, timer), 0),
   );
   const [result, setResult] = useState<GameResult | null>(null);
   const [isNewHigh, setIsNewHigh] = useState(false);
@@ -46,14 +53,27 @@ const Index = () => {
   useEffect(() => localStorage.setItem(STORAGE_KEYS.difficulty, difficulty), [difficulty]);
   useEffect(() => localStorage.setItem(STORAGE_KEYS.timer, String(timer)), [timer]);
   useEffect(() => localStorage.setItem(STORAGE_KEYS.sound, String(soundOn)), [soundOn]);
+  useEffect(() => localStorage.setItem(STORAGE_KEYS.practiceOp, practiceOp), [practiceOp]);
+  useEffect(
+    () => localStorage.setItem(STORAGE_KEYS.practiceFamily, String(practiceFamily)),
+    [practiceFamily],
+  );
   useEffect(() => {
-    setHighScore(readNum(highScoreKey(operation, difficulty), 0));
-  }, [operation, difficulty]);
+    setHighScore(readNum(highScoreKey(operation, difficulty, timer), 0));
+  }, [operation, difficulty, timer]);
 
-  const start = () => {
+  const startGame = () => {
     setResult(null);
     setIsNewHigh(false);
     setScreen("game");
+  };
+
+  const startPractice = (op: Operation, family: number) => {
+    setPracticeOp(op);
+    setPracticeFamily(family);
+    setResult(null);
+    setIsNewHigh(false);
+    setScreen("practice");
   };
 
   const handleEnd = (r: GameResult) => {
@@ -62,7 +82,7 @@ const Index = () => {
       const beat = r.score > highScore;
       if (beat) {
         setHighScore(r.score);
-        localStorage.setItem(highScoreKey(operation, difficulty), String(r.score));
+        localStorage.setItem(highScoreKey(operation, difficulty, timer), String(r.score));
       }
       setIsNewHigh(beat && r.score > 0);
     } else {
@@ -84,7 +104,16 @@ const Index = () => {
           onDifficulty={setDifficulty}
           onTimer={setTimer}
           onToggleSound={() => setSoundOn((s) => !s)}
-          onStart={start}
+          onStart={startGame}
+          onPracticeMode={() => setScreen("practiceSetup")}
+        />
+      )}
+      {screen === "practiceSetup" && (
+        <PracticeSetupScreen
+          initialOperation={practiceOp}
+          initialFamily={practiceFamily}
+          onBack={() => setScreen("setup")}
+          onStart={startPractice}
         />
       )}
       {screen === "game" && (
@@ -97,6 +126,17 @@ const Index = () => {
           onQuit={() => setScreen("setup")}
         />
       )}
+      {screen === "practice" && (
+        <GameScreen
+          operation={practiceOp}
+          difficulty={difficulty}
+          timer="practice"
+          practiceFamily={practiceFamily}
+          soundOn={soundOn}
+          onEnd={handleEnd}
+          onQuit={() => setScreen("practiceSetup")}
+        />
+      )}
       {screen === "results" && result && (
         <ResultsScreen
           score={result.score}
@@ -105,7 +145,18 @@ const Index = () => {
           highScore={highScore}
           isNewHighScore={isNewHigh}
           practice={result.practice}
-          onPlayAgain={start}
+          operation={result.operation}
+          family={result.family}
+          onPlayAgain={() => {
+            if (result.practice) {
+              startPractice(result.operation, result.family || 1);
+            } else {
+              startGame();
+            }
+          }}
+          onChooseAnother={
+            result.practice ? () => setScreen("practiceSetup") : undefined
+          }
           onHome={() => setScreen("setup")}
         />
       )}

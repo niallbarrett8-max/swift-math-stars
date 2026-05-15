@@ -1,40 +1,34 @@
-import { Sparkles, Volume2, VolumeX, Plus, Minus, X as XIcon, Divide, Infinity as InfIcon } from "lucide-react";
+import { Sparkles, Volume2, VolumeX, Plus, Minus, X as XIcon, Divide, GraduationCap } from "lucide-react";
 import { Difficulty, Operation, OP_LABEL, TimerOption } from "@/lib/game";
-
-export type TimerChoice = TimerOption | "practice";
 
 interface SetupScreenProps {
   operation: Operation;
   difficulty: Difficulty;
-  timer: TimerChoice;
+  timer: TimerOption;
   soundOn: boolean;
   highScore: number;
   onOperation: (o: Operation) => void;
   onDifficulty: (d: Difficulty) => void;
-  onTimer: (t: TimerChoice) => void;
+  onTimer: (t: TimerOption) => void;
   onToggleSound: () => void;
   onStart: () => void;
+  onPracticeMode: () => void;
 }
 
 const operations: { id: Operation; icon: typeof Plus; gradient: string }[] = [
   { id: "add", icon: Plus, gradient: "btn-3d-success" },
   { id: "sub", icon: Minus, gradient: "btn-3d-secondary" },
-  { id: "mul", icon: XIcon, gradient: "" }, // primary default
+  { id: "mul", icon: XIcon, gradient: "" },
   { id: "div", icon: Divide, gradient: "btn-3d-accent" },
 ];
 
-const difficulties: { id: Difficulty; label: string; sub: string; cls: string }[] = [
-  { id: "easy", label: "Easy", sub: "warm-up", cls: "btn-3d-success" },
-  { id: "medium", label: "Medium", sub: "balanced", cls: "btn-3d-secondary" },
-  { id: "hard", label: "Hard", sub: "challenge", cls: "" },
+const difficulties: { id: Difficulty; label: string; cls: string }[] = [
+  { id: "easy", label: "Easy", cls: "btn-3d-success" },
+  { id: "medium", label: "Medium", cls: "btn-3d-secondary" },
+  { id: "hard", label: "Hard", cls: "" },
 ];
 
-const timers: { id: TimerChoice; label: string }[] = [
-  { id: 30, label: "30s" },
-  { id: 60, label: "60s" },
-  { id: 120, label: "120s" },
-  { id: "practice", label: "Practice" },
-];
+const timers: TimerOption[] = [30, 60, 120];
 
 export const SetupScreen = ({
   operation,
@@ -47,15 +41,12 @@ export const SetupScreen = ({
   onTimer,
   onToggleSound,
   onStart,
+  onPracticeMode,
 }: SetupScreenProps) => {
   const subFor = (d: Difficulty) => {
-    if (operation === "mul" || operation === "div") {
+    if (operation === "mul" || operation === "div")
       return { easy: "1 – 5", medium: "1 – 10", hard: "1 – 12" }[d];
-    }
-    if (operation === "add" || operation === "sub") {
-      return { easy: "1 – 10", medium: "1 – 20", hard: "1 – 50" }[d];
-    }
-    return "";
+    return { easy: "1 – 10", medium: "1 – 20", hard: "1 – 50" }[d];
   };
 
   return (
@@ -70,9 +61,9 @@ export const SetupScreen = ({
         <p className="text-base sm:text-lg text-muted-foreground font-semibold max-w-md mx-auto">
           Practice {OP_LABEL[operation].toLowerCase()} and beat your high score!
         </p>
-        {highScore > 0 && timer !== "practice" && (
+        {highScore > 0 && (
           <p className="mt-3 text-sm font-bold text-accent-foreground/80">
-            🏆 Personal Best ({OP_LABEL[operation]} · {difficulty}):{" "}
+            🏆 Personal Best ({OP_LABEL[operation]} · {difficulty} · {timer}s):{" "}
             <span className="text-foreground">{highScore}</span>
           </p>
         )}
@@ -112,7 +103,6 @@ export const SetupScreen = ({
                 key={d.id}
                 onClick={() => onDifficulty(d.id)}
                 aria-pressed={active}
-                disabled={timer === "practice"}
                 className={`btn-3d ${d.cls} flex-col py-3 sm:py-4 ${
                   active ? "btn-3d-active-ring" : "opacity-75"
                 }`}
@@ -123,30 +113,23 @@ export const SetupScreen = ({
             );
           })}
         </div>
-        {timer === "practice" && (
-          <p className="text-xs text-muted-foreground font-semibold mt-2 text-center">
-            Practice mode covers full fact families — difficulty isn't used.
-          </p>
-        )}
       </section>
 
       <section className="mb-6">
-        <h2 className="text-lg font-extrabold mb-3">Choose your mode</h2>
-        <div className="grid grid-cols-4 gap-2 sm:gap-3">
+        <h2 className="text-lg font-extrabold mb-3">Choose game length</h2>
+        <div className="grid grid-cols-3 gap-2 sm:gap-3">
           {timers.map((t) => {
-            const active = timer === t.id;
-            const isPractice = t.id === "practice";
+            const active = timer === t;
             return (
               <button
-                key={String(t.id)}
-                onClick={() => onTimer(t.id)}
+                key={t}
+                onClick={() => onTimer(t)}
                 aria-pressed={active}
-                className={`btn-3d ${isPractice ? "btn-3d-accent" : "btn-3d-secondary"} flex-col py-3 sm:py-4 text-sm sm:text-base ${
+                className={`btn-3d btn-3d-secondary flex-col py-3 sm:py-4 text-base sm:text-lg ${
                   active ? "btn-3d-active-ring" : "opacity-75"
                 }`}
               >
-                {isPractice ? <InfIcon className="size-5" strokeWidth={3} /> : null}
-                <span>{t.label}</span>
+                {t}s
               </button>
             );
           })}
@@ -175,8 +158,11 @@ export const SetupScreen = ({
         </span>
       </button>
 
-      <button onClick={onStart} className="btn-3d w-full text-2xl py-5">
-        {timer === "practice" ? "Start Practice →" : "Start Game →"}
+      <button onClick={onStart} className="btn-3d w-full text-2xl py-5 mb-3">
+        Start Game →
+      </button>
+      <button onClick={onPracticeMode} className="btn-3d btn-3d-accent w-full text-lg py-4">
+        <GraduationCap className="size-5" /> Practice Mode
       </button>
     </div>
   );
