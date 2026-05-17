@@ -124,9 +124,17 @@ export const PracticeSetupScreen = ({
         </p>
       </section>
 
-      <button onClick={() => onStart(op, family)} className="btn-3d w-full text-2xl py-5">
-        Start Practice →
-      </button>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <button
+          onClick={() => onLearn(op, family)}
+          className="btn-3d btn-3d-secondary w-full text-xl py-4"
+        >
+          <BookOpen className="size-5" /> Learn
+        </button>
+        <button onClick={() => onStart(op, family)} className="btn-3d w-full text-xl py-4">
+          Start Practice →
+        </button>
+      </div>
     </div>
   );
 };
