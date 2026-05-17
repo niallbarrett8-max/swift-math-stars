@@ -39,6 +39,8 @@ export const SetupScreen = ({
   timer,
   soundOn,
   highScore,
+  activeProfileId,
+  onProfileChange,
   onOperation,
   onDifficulty,
   onTimer,
@@ -54,6 +56,7 @@ export const SetupScreen = ({
 
   return (
     <div className="w-full max-w-2xl gradient-card rounded-3xl shadow-card p-6 sm:p-10 animate-soft-fade">
+      <ProfileSelector activeId={activeProfileId} onChange={onProfileChange} />
       <div className="text-center mb-8">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full gradient-accent text-accent-foreground font-bold text-sm mb-4 shadow-soft">
           <Sparkles className="size-4" /> Math Adventure
