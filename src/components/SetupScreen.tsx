@@ -55,8 +55,8 @@ export const SetupScreen = ({
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full gradient-accent text-accent-foreground font-bold text-sm mb-4 shadow-soft">
           <Sparkles className="size-4" /> Math Adventure
         </div>
-        <h1 className="text-5xl sm:text-7xl font-extrabold text-gradient mb-3 leading-tight">
-          Math Stars
+        <h1 className="text-4xl sm:text-6xl font-extrabold text-gradient mb-3 leading-tight">
+          Hayley's Math Stars
         </h1>
         <p className="text-base sm:text-lg text-muted-foreground font-semibold max-w-md mx-auto">
           Practice {OP_LABEL[operation].toLowerCase()} and beat your high score!
