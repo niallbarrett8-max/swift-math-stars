@@ -22,6 +22,7 @@ export const PracticeSetupScreen = ({
   initialFamily,
   onBack,
   onStart,
+  onLearn,
 }: PracticeSetupScreenProps) => {
   const [op, setOp] = useState<Operation>(initialOperation);
   const max = familyMax(op);
@@ -36,11 +37,25 @@ export const PracticeSetupScreen = ({
   };
 
   const numbers = Array.from({ length: max }, (_, i) => i + 1);
-  const exampleA = op === "div" ? family * 1 : family;
-  const exampleB = 1;
-  const exampleAns =
-    op === "add" ? family + 1 : op === "sub" ? family : op === "mul" ? family : 1;
+  // Build a representative first fact for each operation (matches buildPracticeFamily).
   const exampleSym = { add: "+", sub: "−", mul: "×", div: "÷" }[op];
+  let exampleA = family;
+  let exampleB = 1;
+  let exampleAns: number;
+  if (op === "add") {
+    exampleAns = family + 1;
+  } else if (op === "sub") {
+    exampleA = family + 1;
+    exampleB = 1;
+    exampleAns = family;
+  } else if (op === "mul") {
+    exampleAns = family * 1;
+  } else {
+    // div: family ÷ 1 = family
+    exampleA = family;
+    exampleB = 1;
+    exampleAns = family;
+  }
 
   return (
     <div className="w-full max-w-2xl gradient-card rounded-3xl shadow-card p-6 sm:p-10 animate-soft-fade">
