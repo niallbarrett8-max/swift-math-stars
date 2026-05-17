@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, Plus, Minus, X as XIcon, Divide, GraduationCap } from "lucide-react";
+import { ArrowLeft, Plus, Minus, X as XIcon, Divide, GraduationCap, BookOpen } from "lucide-react";
 import { Operation, OP_LABEL, familyMax } from "@/lib/game";
 
 interface PracticeSetupScreenProps {
@@ -7,6 +7,7 @@ interface PracticeSetupScreenProps {
   initialFamily: number;
   onBack: () => void;
   onStart: (op: Operation, family: number) => void;
+  onLearn: (op: Operation, family: number) => void;
 }
 
 const operations: { id: Operation; icon: typeof Plus; cls: string }[] = [
