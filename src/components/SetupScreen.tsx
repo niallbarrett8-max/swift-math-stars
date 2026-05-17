@@ -1,5 +1,6 @@
 import { Sparkles, Volume2, VolumeX, Plus, Minus, X as XIcon, Divide, GraduationCap } from "lucide-react";
 import { Difficulty, Operation, OP_LABEL, TimerOption } from "@/lib/game";
+import { ProfileSelector } from "./ProfileSelector";
 
 interface SetupScreenProps {
   operation: Operation;
@@ -7,6 +8,8 @@ interface SetupScreenProps {
   timer: TimerOption;
   soundOn: boolean;
   highScore: number;
+  activeProfileId: string;
+  onProfileChange: (id: string) => void;
   onOperation: (o: Operation) => void;
   onDifficulty: (d: Difficulty) => void;
   onTimer: (t: TimerOption) => void;
