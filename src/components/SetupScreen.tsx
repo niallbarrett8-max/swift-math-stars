@@ -1,5 +1,6 @@
 import { Sparkles, Volume2, VolumeX, Plus, Minus, X as XIcon, Divide, GraduationCap } from "lucide-react";
 import { Difficulty, Operation, OP_LABEL, TimerOption } from "@/lib/game";
+import { ProfileSelector } from "./ProfileSelector";
 
 interface SetupScreenProps {
   operation: Operation;
@@ -7,6 +8,8 @@ interface SetupScreenProps {
   timer: TimerOption;
   soundOn: boolean;
   highScore: number;
+  activeProfileId: string;
+  onProfileChange: (id: string) => void;
   onOperation: (o: Operation) => void;
   onDifficulty: (d: Difficulty) => void;
   onTimer: (t: TimerOption) => void;
@@ -36,6 +39,8 @@ export const SetupScreen = ({
   timer,
   soundOn,
   highScore,
+  activeProfileId,
+  onProfileChange,
   onOperation,
   onDifficulty,
   onTimer,
@@ -51,12 +56,13 @@ export const SetupScreen = ({
 
   return (
     <div className="w-full max-w-2xl gradient-card rounded-3xl shadow-card p-6 sm:p-10 animate-soft-fade">
+      <ProfileSelector activeId={activeProfileId} onChange={onProfileChange} />
       <div className="text-center mb-8">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full gradient-accent text-accent-foreground font-bold text-sm mb-4 shadow-soft">
           <Sparkles className="size-4" /> Math Adventure
         </div>
-        <h1 className="text-5xl sm:text-7xl font-extrabold text-gradient mb-3 leading-tight">
-          Math Stars
+        <h1 className="text-4xl sm:text-6xl font-extrabold text-gradient mb-3 leading-tight">
+          Hayley's Math Stars
         </h1>
         <p className="text-base sm:text-lg text-muted-foreground font-semibold max-w-md mx-auto">
           Practice {OP_LABEL[operation].toLowerCase()} and beat your high score!

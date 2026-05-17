@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, Plus, Minus, X as XIcon, Divide, GraduationCap } from "lucide-react";
+import { ArrowLeft, Plus, Minus, X as XIcon, Divide, GraduationCap, BookOpen } from "lucide-react";
 import { Operation, OP_LABEL, familyMax } from "@/lib/game";
 
 interface PracticeSetupScreenProps {
@@ -7,6 +7,7 @@ interface PracticeSetupScreenProps {
   initialFamily: number;
   onBack: () => void;
   onStart: (op: Operation, family: number) => void;
+  onLearn: (op: Operation, family: number) => void;
 }
 
 const operations: { id: Operation; icon: typeof Plus; cls: string }[] = [
@@ -21,6 +22,7 @@ export const PracticeSetupScreen = ({
   initialFamily,
   onBack,
   onStart,
+  onLearn,
 }: PracticeSetupScreenProps) => {
   const [op, setOp] = useState<Operation>(initialOperation);
   const max = familyMax(op);
@@ -35,11 +37,25 @@ export const PracticeSetupScreen = ({
   };
 
   const numbers = Array.from({ length: max }, (_, i) => i + 1);
-  const exampleA = op === "div" ? family * 1 : family;
-  const exampleB = 1;
-  const exampleAns =
-    op === "add" ? family + 1 : op === "sub" ? family : op === "mul" ? family : 1;
+  // Build a representative first fact for each operation (matches buildPracticeFamily).
   const exampleSym = { add: "+", sub: "−", mul: "×", div: "÷" }[op];
+  let exampleA = family;
+  let exampleB = 1;
+  let exampleAns: number;
+  if (op === "add") {
+    exampleAns = family + 1;
+  } else if (op === "sub") {
+    exampleA = family + 1;
+    exampleB = 1;
+    exampleAns = family;
+  } else if (op === "mul") {
+    exampleAns = family * 1;
+  } else {
+    // div: family ÷ 1 = family
+    exampleA = family;
+    exampleB = 1;
+    exampleAns = family;
+  }
 
   return (
     <div className="w-full max-w-2xl gradient-card rounded-3xl shadow-card p-6 sm:p-10 animate-soft-fade">
@@ -108,9 +124,17 @@ export const PracticeSetupScreen = ({
         </p>
       </section>
 
-      <button onClick={() => onStart(op, family)} className="btn-3d w-full text-2xl py-5">
-        Start Practice →
-      </button>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <button
+          onClick={() => onLearn(op, family)}
+          className="btn-3d btn-3d-secondary w-full text-xl py-4"
+        >
+          <BookOpen className="size-5" /> Learn
+        </button>
+        <button onClick={() => onStart(op, family)} className="btn-3d w-full text-xl py-4">
+          Start Practice →
+        </button>
+      </div>
     </div>
   );
 };
