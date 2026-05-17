@@ -184,7 +184,7 @@ export const GameScreen = ({
   return (
     <div className="w-full max-w-2xl space-y-4 animate-soft-fade">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-xl sm:text-3xl font-extrabold text-gradient">Math Stars</h2>
+        <h2 className="text-xl sm:text-3xl font-extrabold text-gradient">Hayley's Math Stars</h2>
         <button
           onClick={onQuit}
           className="btn-3d btn-3d-neutral px-4 py-2 text-sm"
