@@ -1,11 +1,20 @@
-import { Sparkles, Volume2, VolumeX, Plus, Minus, X as XIcon, Divide, GraduationCap } from "lucide-react";
-import { Difficulty, Operation, OP_LABEL, TimerOption } from "@/lib/game";
+import { Sparkles, Volume2, VolumeX, Plus, Minus, X as XIcon, Divide, GraduationCap, Map } from "lucide-react";
+import {
+  Difficulty,
+  Operation,
+  OP_LABEL,
+  TimerOption,
+  TargetScore,
+  TIMER_OPTIONS,
+  TARGET_OPTIONS,
+} from "@/lib/game";
 import { ProfileSelector } from "./ProfileSelector";
 
 interface SetupScreenProps {
   operation: Operation;
   difficulty: Difficulty;
   timer: TimerOption;
+  target: TargetScore;
   soundOn: boolean;
   highScore: number;
   activeProfileId: string;
@@ -13,9 +22,11 @@ interface SetupScreenProps {
   onOperation: (o: Operation) => void;
   onDifficulty: (d: Difficulty) => void;
   onTimer: (t: TimerOption) => void;
+  onTarget: (t: TargetScore) => void;
   onToggleSound: () => void;
   onStart: () => void;
   onPracticeMode: () => void;
+  onAdventure: () => void;
 }
 
 const operations: { id: Operation; icon: typeof Plus; gradient: string }[] = [
@@ -31,12 +42,11 @@ const difficulties: { id: Difficulty; label: string; cls: string }[] = [
   { id: "hard", label: "Hard", cls: "" },
 ];
 
-const timers: TimerOption[] = [30, 60, 120];
-
 export const SetupScreen = ({
   operation,
   difficulty,
   timer,
+  target,
   soundOn,
   highScore,
   activeProfileId,
@@ -44,9 +54,11 @@ export const SetupScreen = ({
   onOperation,
   onDifficulty,
   onTimer,
+  onTarget,
   onToggleSound,
   onStart,
   onPracticeMode,
+  onAdventure,
 }: SetupScreenProps) => {
   const subFor = (d: Difficulty) => {
     if (operation === "mul" || operation === "div")
@@ -58,9 +70,12 @@ export const SetupScreen = ({
     <div className="w-full max-w-2xl gradient-card rounded-3xl shadow-card p-6 sm:p-10 animate-soft-fade">
       <ProfileSelector activeId={activeProfileId} onChange={onProfileChange} />
       <div className="text-center mb-8">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full gradient-accent text-accent-foreground font-bold text-sm mb-4 shadow-soft">
+        <button
+          onClick={onAdventure}
+          className="btn-3d btn-3d-accent inline-flex items-center gap-2 px-4 py-2 text-sm mb-4 shadow-glow"
+        >
           <Sparkles className="size-4" /> Math Adventure
-        </div>
+        </button>
         <h1 className="text-4xl sm:text-6xl font-extrabold text-gradient mb-3 leading-tight">
           Hayley's Math Stars
         </h1>
@@ -69,7 +84,8 @@ export const SetupScreen = ({
         </p>
         {highScore > 0 && (
           <p className="mt-3 text-sm font-bold text-accent-foreground/80">
-            🏆 Personal Best ({OP_LABEL[operation]} · {difficulty} · {timer}s):{" "}
+            🏆 Personal Best ({OP_LABEL[operation]} · {difficulty} ·{" "}
+            {timer === "endless" ? "Endless" : `${timer}s`}):{" "}
             <span className="text-foreground">{highScore}</span>
           </p>
         )}
@@ -124,18 +140,39 @@ export const SetupScreen = ({
       <section className="mb-6">
         <h2 className="text-lg font-extrabold mb-3">Choose game length</h2>
         <div className="grid grid-cols-3 gap-2 sm:gap-3">
-          {timers.map((t) => {
-            const active = timer === t;
+          {TIMER_OPTIONS.map((t) => {
+            const active = timer === t.value;
             return (
               <button
-                key={t}
-                onClick={() => onTimer(t)}
+                key={String(t.value)}
+                onClick={() => onTimer(t.value)}
                 aria-pressed={active}
-                className={`btn-3d btn-3d-secondary flex-col py-3 sm:py-4 text-base sm:text-lg ${
+                className={`btn-3d btn-3d-secondary py-3 sm:py-4 text-sm sm:text-base ${
                   active ? "btn-3d-active-ring" : "opacity-75"
                 }`}
               >
-                {t}s
+                {t.label}
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="mb-6">
+        <h2 className="text-lg font-extrabold mb-3">Choose target score</h2>
+        <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-3">
+          {TARGET_OPTIONS.map((t) => {
+            const active = target === t.value;
+            return (
+              <button
+                key={String(t.value)}
+                onClick={() => onTarget(t.value)}
+                aria-pressed={active}
+                className={`btn-3d btn-3d-accent py-3 sm:py-4 text-sm sm:text-base ${
+                  active ? "btn-3d-active-ring" : "opacity-75"
+                }`}
+              >
+                {t.label}
               </button>
             );
           })}
@@ -167,9 +204,14 @@ export const SetupScreen = ({
       <button onClick={onStart} className="btn-3d w-full text-2xl py-5 mb-3">
         Start Game →
       </button>
-      <button onClick={onPracticeMode} className="btn-3d btn-3d-accent w-full text-lg py-4">
-        <GraduationCap className="size-5" /> Practice Mode
-      </button>
+      <div className="grid grid-cols-2 gap-3">
+        <button onClick={onPracticeMode} className="btn-3d btn-3d-accent w-full text-base py-4">
+          <GraduationCap className="size-5" /> Practice
+        </button>
+        <button onClick={onAdventure} className="btn-3d btn-3d-secondary w-full text-base py-4">
+          <Map className="size-5" /> Adventure
+        </button>
+      </div>
     </div>
   );
 };

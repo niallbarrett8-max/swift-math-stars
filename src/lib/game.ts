@@ -1,6 +1,8 @@
 export type Difficulty = "easy" | "medium" | "hard";
-export type TimerOption = 30 | 60 | 120;
+export type TimerOption = 30 | 60 | 120 | 300 | 600 | "endless";
+export type TargetScore = 10 | 25 | 50 | 100 | "endless";
 export type Operation = "add" | "sub" | "mul" | "div";
+export type AdventureDifficulty = "easy" | "medium" | "hard";
 
 export interface Question {
   a: number;
@@ -26,15 +28,37 @@ export const OP_LABEL: Record<Operation, string> = {
 const MUL_DIV_MAX: Record<Difficulty, number> = { easy: 5, medium: 10, hard: 12 };
 const ADD_SUB_MAX: Record<Difficulty, number> = { easy: 10, medium: 20, hard: 50 };
 
+// Adventure rules (per spec)
+const ADV_ADD_SUB_MAX: Record<AdventureDifficulty, number> = { easy: 5, medium: 20, hard: 50 };
+const ADV_MUL_DIV_MAX: Record<AdventureDifficulty, number> = { easy: 5, medium: 10, hard: 12 };
+
 export const STORAGE_KEYS = {
   highScore: "mathstars.highScore.v2",
   sound: "mathstars.sound",
   difficulty: "mathstars.difficulty",
   timer: "mathstars.timer",
+  target: "mathstars.target",
   operation: "mathstars.operation",
   practiceOp: "mathstars.practice.op",
   practiceFamily: "mathstars.practice.family",
 };
+
+export const TIMER_OPTIONS: { value: TimerOption; label: string }[] = [
+  { value: 30, label: "30s" },
+  { value: 60, label: "60s" },
+  { value: 120, label: "120s" },
+  { value: 300, label: "5 min" },
+  { value: 600, label: "10 min" },
+  { value: "endless", label: "♾️ Endless" },
+];
+
+export const TARGET_OPTIONS: { value: TargetScore; label: string }[] = [
+  { value: 10, label: "10" },
+  { value: 25, label: "25" },
+  { value: 50, label: "50" },
+  { value: 100, label: "100" },
+  { value: "endless", label: "♾️ Endless" },
+];
 
 export const highScoreKey = (op: Operation, diff: Difficulty, timer: TimerOption) =>
   `${STORAGE_KEYS.highScore}.${op}.${diff}.${timer}`;
@@ -81,21 +105,54 @@ export const generateQuestion = (
   return buildOne(op, diff);
 };
 
+/** Adventure: mixed random operation, ranges per adventure difficulty. */
+const buildAdventure = (diff: AdventureDifficulty): Question => {
+  const ops: Operation[] = ["add", "sub", "mul", "div"];
+  const op = ops[Math.floor(Math.random() * ops.length)];
+  if (op === "mul") {
+    const m = ADV_MUL_DIV_MAX[diff];
+    const a = rand(1, m), b = rand(1, m);
+    return { a, b, op, answer: a * b };
+  }
+  if (op === "div") {
+    const m = ADV_MUL_DIV_MAX[diff];
+    const b = rand(1, m), q = rand(1, m);
+    return { a: b * q, b, op, answer: q };
+  }
+  if (op === "add") {
+    const m = ADV_ADD_SUB_MAX[diff];
+    const a = rand(1, m), b = rand(1, m);
+    return { a, b, op, answer: a + b };
+  }
+  const m = ADV_ADD_SUB_MAX[diff];
+  const a = rand(1, m);
+  const b = rand(1, a);
+  return { a, b, op, answer: a - b };
+};
+
+export const generateAdventureQuestion = (
+  diff: AdventureDifficulty,
+  prev?: Question,
+): Question => {
+  for (let i = 0; i < 8; i++) {
+    const q = buildAdventure(diff);
+    if (!sameQ(prev, q)) return q;
+  }
+  return buildAdventure(diff);
+};
+
 export const calcAccuracy = (correct: number, total: number) =>
   total === 0 ? 100 : Math.round((correct / total) * 100);
 
-// Practice fact-family ranges
 export const familyMax = (op: Operation) =>
   op === "mul" || op === "div" ? 12 : 10;
 
-// Build a practice set for one fact family k.
 export const buildPracticeFamily = (op: Operation, k: number): Question[] => {
   const max = familyMax(op);
   const out: Question[] = [];
   if (op === "add") {
     for (let i = 1; i <= max; i++) out.push({ a: k, b: i, op, answer: k + i });
   } else if (op === "sub") {
-    // minuend = k + i, subtrahend = i, answer = k (subtraction facts "for k")
     for (let i = 1; i <= max; i++) out.push({ a: k + i, b: i, op, answer: k });
   } else if (op === "mul") {
     for (let i = 1; i <= max; i++) out.push({ a: k, b: i, op, answer: k * i });
@@ -104,3 +161,20 @@ export const buildPracticeFamily = (op: Operation, k: number): Question[] => {
   }
   return out;
 };
+
+// ===== Adventure star tiers / challenge constants =====
+export const ADVENTURE_DURATION = 60; // seconds
+export const STAR_GOALS = { bronze: 5, silver: 10, gold: 15 } as const;
+
+export const starsForScore = (score: number): 0 | 1 | 2 | 3 => {
+  if (score >= STAR_GOALS.gold) return 3;
+  if (score >= STAR_GOALS.silver) return 2;
+  if (score >= STAR_GOALS.bronze) return 1;
+  return 0;
+};
+
+export const todayKey = (d = new Date()) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+export const adventureDayKey = (date: string, diff: AdventureDifficulty) =>
+  `adventure.${date}.${diff}`;
