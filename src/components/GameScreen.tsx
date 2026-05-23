@@ -10,6 +10,7 @@ import {
   Question,
   TargetScore,
   TimerOption,
+  STAR_GOALS,
   buildPracticeFamily,
   calcAccuracy,
   generateAdventureQuestion,
@@ -109,7 +110,6 @@ export const GameScreen = ({
     const total = s.score + s.wrong;
     let stars: 0 | 1 | 2 | 3 | undefined;
     if (isChallenge) {
-      const { STAR_GOALS } = require("@/lib/game");
       stars = s.score >= STAR_GOALS.gold ? 3 : s.score >= STAR_GOALS.silver ? 2 : s.score >= STAR_GOALS.bronze ? 1 : 0;
     }
     onEnd({
