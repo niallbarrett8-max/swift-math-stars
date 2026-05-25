@@ -5,28 +5,42 @@ import { GameScreen, GameResult } from "@/components/GameScreen";
 import { ResultsScreen } from "@/components/ResultsScreen";
 import { LearnScreen } from "@/components/LearnScreen";
 import { AdventureScreen } from "@/components/AdventureScreen";
+import { CalendarScreen } from "@/components/CalendarScreen";
+import { ClassroomScreen } from "@/components/ClassroomScreen";
 import {
   ADVENTURE_DURATION,
   AdventureDifficulty,
   Difficulty,
   Operation,
   STORAGE_KEYS,
+  StarTier,
   TargetScore,
   TimerOption,
-  adventureDayKey,
   highScoreKey,
+  hsAccKey,
+  hsScoreKey,
+  starTimeKey,
+  tierUnlockedKey,
   todayKey,
 } from "@/lib/game";
-import { getActiveProfileId, pkey, setActiveProfileId } from "@/lib/profiles";
+import {
+  getActiveProfileId,
+  isClassroomStudentId,
+  pkey,
+  setActiveProfileId,
+} from "@/lib/profiles";
 
 type Screen =
   | "setup"
+  | "classroom"
   | "practiceSetup"
   | "game"
   | "practice"
   | "learn"
   | "adventure"
-  | "challenge"
+  | "calendar"
+  | "starChallenge"
+  | "hsChallenge"
   | "results";
 
 const readNum = (key: string, fallback: number) => {
@@ -57,6 +71,12 @@ const readTarget = (profileId: string): TargetScore => {
   return "endless";
 };
 
+const readAdvDiff = (profileId: string): AdventureDifficulty => {
+  const v = readStr(pkey(profileId, STORAGE_KEYS.adventureDiff), "easy");
+  if (v === "medium" || v === "hard") return v;
+  return "easy";
+};
+
 const Index = () => {
   const [screen, setScreen] = useState<Screen>("setup");
   const [profileId, setProfileId] = useState<string>(() => getActiveProfileId());
@@ -75,10 +95,13 @@ const Index = () => {
   const [practiceOp, setPracticeOp] = useState<Operation>(
     () => readStr(pkey(profileId, STORAGE_KEYS.practiceOp), "mul") as Operation,
   );
-  const [practiceFamily, setPracticeFamily] = useState<number>(
-    () => readNum(pkey(profileId, STORAGE_KEYS.practiceFamily), 2),
+  const [practiceFamily, setPracticeFamily] = useState<number>(() =>
+    readNum(pkey(profileId, STORAGE_KEYS.practiceFamily), 2),
   );
-  const [challengeDiff, setChallengeDiff] = useState<AdventureDifficulty>("easy");
+  const [adventureDiff, setAdventureDiff] = useState<AdventureDifficulty>(() =>
+    readAdvDiff(profileId),
+  );
+  const [activeStarTier, setActiveStarTier] = useState<StarTier>("bronze");
 
   const [highScore, setHighScore] = useState<number>(() =>
     readNum(pkey(profileId, highScoreKey(operation, difficulty, timer)), 0),
@@ -86,8 +109,8 @@ const Index = () => {
   const [result, setResult] = useState<GameResult | null>(null);
   const [isNewHigh, setIsNewHigh] = useState(false);
   const [continueScore, setContinueScore] = useState(0);
-  const [bumpKey, setBumpKey] = useState(0); // force AdventureScreen re-read
 
+  // Sync profile-scoped settings when active profile changes
   useEffect(() => {
     setActiveProfileId(profileId);
     setOperation(readStr(pkey(profileId, STORAGE_KEYS.operation), "mul") as Operation);
@@ -97,6 +120,7 @@ const Index = () => {
     setSoundOn(readStr(pkey(profileId, STORAGE_KEYS.sound), "true") !== "false");
     setPracticeOp(readStr(pkey(profileId, STORAGE_KEYS.practiceOp), "mul") as Operation);
     setPracticeFamily(readNum(pkey(profileId, STORAGE_KEYS.practiceFamily), 2));
+    setAdventureDiff(readAdvDiff(profileId));
   }, [profileId]);
 
   useEffect(() => {
@@ -124,8 +148,19 @@ const Index = () => {
     );
   }, [profileId, practiceFamily]);
   useEffect(() => {
+    localStorage.setItem(pkey(profileId, STORAGE_KEYS.adventureDiff), adventureDiff);
+  }, [profileId, adventureDiff]);
+  useEffect(() => {
     setHighScore(readNum(pkey(profileId, highScoreKey(operation, difficulty, timer)), 0));
   }, [profileId, operation, difficulty, timer]);
+
+  const handleProfileChange = (id: string) => {
+    if (id === "classroom") {
+      setScreen("classroom");
+      return;
+    }
+    setProfileId(id);
+  };
 
   const startGame = () => {
     setResult(null);
@@ -148,23 +183,47 @@ const Index = () => {
     setScreen("learn");
   };
 
-  const startChallenge = (diff: AdventureDifficulty) => {
-    setChallengeDiff(diff);
+  const startStar = (diff: AdventureDifficulty, tier: StarTier) => {
+    setAdventureDiff(diff);
+    setActiveStarTier(tier);
     setResult(null);
     setIsNewHigh(false);
-    setScreen("challenge");
+    setScreen("starChallenge");
+  };
+
+  const startHighScore = (diff: AdventureDifficulty) => {
+    setAdventureDiff(diff);
+    setResult(null);
+    setIsNewHigh(false);
+    setScreen("hsChallenge");
   };
 
   const handleEnd = (r: GameResult) => {
     setResult(r);
-    if (r.challenge) {
-      // Save best stars for the day for this profile.
-      const key = pkey(profileId, adventureDayKey(todayKey(), r.challenge));
-      const prev = readNum(key, 0);
-      const next = Math.max(prev, r.starsEarned ?? 0);
-      if (next !== prev) localStorage.setItem(key, String(next));
-      setBumpKey((k) => k + 1);
+    const today = todayKey();
+    if (r.starTier) {
+      if (r.starEarned && r.elapsedSeconds !== undefined) {
+        // Record best (lowest) time
+        const k = pkey(profileId, starTimeKey(today, r.starTier));
+        const prev = window.localStorage.getItem(k);
+        const prevN = prev ? Number(prev) : Infinity;
+        if (r.elapsedSeconds < prevN) {
+          localStorage.setItem(k, String(r.elapsedSeconds));
+        }
+        // Mark tier unlocked all-time
+        localStorage.setItem(pkey(profileId, tierUnlockedKey(r.starTier)), "1");
+      }
       setIsNewHigh(false);
+    } else if (r.highScoreChallenge) {
+      const k = pkey(profileId, hsScoreKey(today));
+      const prev = readNum(k, 0);
+      if (r.score > prev) {
+        localStorage.setItem(k, String(r.score));
+        localStorage.setItem(pkey(profileId, hsAccKey(today)), String(r.accuracy));
+        setIsNewHigh(true);
+      } else {
+        setIsNewHigh(false);
+      }
     } else if (!r.practice) {
       const beat = r.score > highScore;
       if (beat) {
@@ -192,7 +251,7 @@ const Index = () => {
           soundOn={soundOn}
           highScore={highScore}
           activeProfileId={profileId}
-          onProfileChange={setProfileId}
+          onProfileChange={handleProfileChange}
           onOperation={setOperation}
           onDifficulty={setDifficulty}
           onTimer={setTimer}
@@ -201,6 +260,15 @@ const Index = () => {
           onStart={startGame}
           onPracticeMode={() => setScreen("practiceSetup")}
           onAdventure={() => setScreen("adventure")}
+        />
+      )}
+      {screen === "classroom" && (
+        <ClassroomScreen
+          onBack={() => setScreen("setup")}
+          onPickStudent={(id) => {
+            setProfileId(id);
+            setScreen("setup");
+          }}
         />
       )}
       {screen === "practiceSetup" && (
@@ -222,11 +290,17 @@ const Index = () => {
       )}
       {screen === "adventure" && (
         <AdventureScreen
-          key={bumpKey}
           profileId={profileId}
+          difficulty={adventureDiff}
+          onDifficultyChange={setAdventureDiff}
           onBack={() => setScreen("setup")}
-          onStartChallenge={startChallenge}
+          onStartStar={startStar}
+          onStartHighScore={startHighScore}
+          onOpenCalendar={() => setScreen("calendar")}
         />
+      )}
+      {screen === "calendar" && (
+        <CalendarScreen profileId={profileId} onBack={() => setScreen("adventure")} />
       )}
       {screen === "game" && (
         <GameScreen
@@ -250,12 +324,26 @@ const Index = () => {
           onQuit={() => setScreen("practiceSetup")}
         />
       )}
-      {screen === "challenge" && (
+      {screen === "starChallenge" && (
         <GameScreen
           operation={"add"}
           difficulty={"easy"}
           timer={ADVENTURE_DURATION as TimerOption}
-          challenge={challengeDiff}
+          challenge={adventureDiff}
+          starTier={activeStarTier}
+          targetScore="endless"
+          soundOn={soundOn}
+          onEnd={handleEnd}
+          onQuit={() => setScreen("adventure")}
+        />
+      )}
+      {screen === "hsChallenge" && (
+        <GameScreen
+          operation={"add"}
+          difficulty={"easy"}
+          timer={ADVENTURE_DURATION as TimerOption}
+          challenge={adventureDiff}
+          isHighScoreChallenge
           targetScore="endless"
           soundOn={soundOn}
           onEnd={handleEnd}
@@ -276,11 +364,13 @@ const Index = () => {
           targetReached={result.targetReached}
           targetScore={result.targetScore}
           challenge={result.challenge}
-          starsEarned={result.starsEarned}
+          starTier={result.starTier}
+          starEarned={result.starEarned}
+          highScoreChallenge={result.highScoreChallenge}
+          elapsedSeconds={result.elapsedSeconds}
           onContinue={
             result.targetReached
               ? () => {
-                  // Continue playing — restart same game but keep the target as endless to avoid re-triggering
                   setContinueScore(result.score);
                   setTarget("endless");
                   setScreen("game");
@@ -288,8 +378,10 @@ const Index = () => {
               : undefined
           }
           onPlayAgain={() => {
-            if (result.challenge) {
-              startChallenge(result.challenge);
+            if (result.starTier) {
+              startStar(result.challenge ?? adventureDiff, result.starTier);
+            } else if (result.highScoreChallenge) {
+              startHighScore(result.challenge ?? adventureDiff);
             } else if (result.practice) {
               startPractice(result.operation, result.family || 1);
             } else {
@@ -301,7 +393,8 @@ const Index = () => {
           }
           onHome={() => {
             setContinueScore(0);
-            setScreen(result.challenge ? "adventure" : "setup");
+            const isAdventure = result.starTier || result.highScoreChallenge || result.challenge;
+            setScreen(isAdventure ? "adventure" : "setup");
           }}
         />
       )}

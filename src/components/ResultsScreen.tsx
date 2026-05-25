@@ -1,6 +1,13 @@
 import { ConfettiCelebration } from "./ConfettiCelebration";
-import { Trophy, RotateCcw, Home, Sparkles, Hash, Play, Star } from "lucide-react";
-import { AdventureDifficulty, OP_LABEL, Operation, TargetScore } from "@/lib/game";
+import { Trophy, RotateCcw, Home, Sparkles, Hash, Play, Star, Clock } from "lucide-react";
+import {
+  AdventureDifficulty,
+  OP_LABEL,
+  Operation,
+  STAR_COLORS,
+  StarTier,
+  TargetScore,
+} from "@/lib/game";
 
 interface ResultsScreenProps {
   score: number;
@@ -15,7 +22,10 @@ interface ResultsScreenProps {
   targetReached?: boolean;
   targetScore?: TargetScore;
   challenge?: AdventureDifficulty;
-  starsEarned?: 0 | 1 | 2 | 3;
+  starTier?: StarTier;
+  starEarned?: boolean;
+  highScoreChallenge?: boolean;
+  elapsedSeconds?: number;
   onPlayAgain: () => void;
   onContinue?: () => void;
   onChooseAnother?: () => void;
@@ -34,22 +44,42 @@ export const ResultsScreen = ({
   family,
   targetReached,
   challenge,
-  starsEarned,
+  starTier,
+  starEarned,
+  highScoreChallenge,
+  elapsedSeconds,
   onPlayAgain,
   onContinue,
   onChooseAnother,
   onHome,
 }: ResultsScreenProps) => {
+  const tierColor = starTier ? STAR_COLORS[starTier].fill : undefined;
   const celebrate =
-    isNewHighScore || targetReached || (practice && accuracy >= 90) || (starsEarned ?? 0) >= 1;
+    isNewHighScore ||
+    targetReached ||
+    (practice && accuracy >= 90) ||
+    !!starEarned ||
+    (highScoreChallenge && isNewHighScore);
 
   return (
     <>
       {celebrate && <ConfettiCelebration />}
       <div className="w-full max-w-xl gradient-card rounded-3xl shadow-card p-6 sm:p-10 text-center animate-soft-fade">
-        {challenge ? (
+        {starTier ? (
+          <div
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-white font-extrabold text-sm mb-4 shadow-glow"
+            style={{ background: tierColor }}
+          >
+            <Star className="size-4 fill-current" />
+            {starEarned ? `${STAR_COLORS[starTier].label} Star Earned!` : `${STAR_COLORS[starTier].label} Challenge`}
+          </div>
+        ) : highScoreChallenge ? (
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full gradient-accent text-accent-foreground font-extrabold text-sm mb-4 shadow-glow">
-            <Sparkles className="size-4" /> Challenge Complete! · {challenge.toUpperCase()}
+            <Trophy className="size-4" /> High Score Run Complete
+          </div>
+        ) : challenge ? (
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full gradient-accent text-accent-foreground font-extrabold text-sm mb-4 shadow-glow">
+            <Sparkles className="size-4" /> Challenge Complete!
           </div>
         ) : targetReached ? (
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full gradient-success text-white font-extrabold text-sm mb-4 shadow-glow">
@@ -70,19 +100,17 @@ export const ResultsScreen = ({
         )}
 
         <div className="mb-6">
-          {challenge && starsEarned !== undefined ? (
-            <div className="flex items-center justify-center gap-2 mb-2">
-              {[1, 2, 3].map((n) => (
-                <Star
-                  key={n}
-                  className={`size-12 sm:size-16 ${
-                    n <= starsEarned
-                      ? "fill-accent text-accent drop-shadow-[0_2px_8px_hsl(var(--accent)/0.6)]"
-                      : "text-muted"
-                  }`}
-                  strokeWidth={2}
-                />
-              ))}
+          {starTier ? (
+            <div className="flex items-center justify-center mb-2">
+              <Star
+                className="size-24"
+                strokeWidth={2}
+                style={{
+                  color: starEarned ? tierColor : "hsl(var(--muted-foreground) / 0.4)",
+                  fill: starEarned ? tierColor : "transparent",
+                  filter: starEarned ? `drop-shadow(0 4px 16px ${tierColor})` : undefined,
+                }}
+              />
             </div>
           ) : (
             <Trophy
@@ -93,13 +121,15 @@ export const ResultsScreen = ({
             />
           )}
           <h2 className="text-3xl sm:text-4xl font-extrabold mb-1">
-            {targetReached
-              ? "You did it!"
-              : (starsEarned ?? 0) >= 3
-                ? "Gold stars!"
+            {starEarned
+              ? `${STAR_COLORS[starTier!].label} unlocked!`
+              : targetReached
+                ? "You did it!"
                 : isNewHighScore
                   ? "Amazing job!"
-                  : "Great effort!"}
+                  : starTier
+                    ? "So close!"
+                    : "Great effort!"}
           </h2>
           <p className="text-muted-foreground font-semibold">Here's how you did:</p>
         </div>
@@ -119,11 +149,18 @@ export const ResultsScreen = ({
           </div>
         </div>
 
+        {(starEarned || highScoreChallenge) && elapsedSeconds !== undefined && (
+          <div className="rounded-2xl bg-background border-4 border-border p-3 mb-4 inline-flex items-center justify-center gap-2 font-extrabold w-full">
+            <Clock className="size-5 text-primary" />
+            {starEarned ? "Completion Time:" : "Time:"} {elapsedSeconds.toFixed(1)}s
+          </div>
+        )}
+
         <p className="text-xs sm:text-sm text-muted-foreground font-bold mb-6">
           {total} total attempts
         </p>
 
-        {!practice && !challenge && (
+        {!practice && !challenge && !highScoreChallenge && !starTier && (
           <div className="rounded-2xl bg-background border-4 border-border p-4 mb-6 flex items-center justify-center gap-2 font-bold">
             <Trophy className="size-5 text-accent" />
             Personal Best:{" "}

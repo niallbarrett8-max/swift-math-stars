@@ -1,16 +1,19 @@
 import { useEffect, useRef, useState } from "react";
-import { X, Infinity as InfinityIcon, Flame, Sparkles } from "lucide-react";
+import { X, Infinity as InfinityIcon, Flame, Sparkles, Trophy, Star } from "lucide-react";
 import { StatsBar } from "./StatsBar";
 import { QuestionCard, Feedback } from "./QuestionCard";
 import { Keypad } from "./Keypad";
 import {
+  ADVENTURE_DURATION,
   AdventureDifficulty,
   Difficulty,
   Operation,
   Question,
+  STAR_COLORS,
+  STAR_GOALS,
+  StarTier,
   TargetScore,
   TimerOption,
-  STAR_GOALS,
   buildPracticeFamily,
   calcAccuracy,
   generateAdventureQuestion,
@@ -30,7 +33,10 @@ export interface GameResult {
   targetScore?: TargetScore;
   // Adventure
   challenge?: AdventureDifficulty;
-  starsEarned?: 0 | 1 | 2 | 3;
+  highScoreChallenge?: boolean;
+  starTier?: StarTier;
+  starEarned?: boolean;
+  elapsedSeconds?: number;
 }
 
 interface GameScreenProps {
@@ -40,13 +46,15 @@ interface GameScreenProps {
   practiceFamily?: number;
   targetScore?: TargetScore;
   challenge?: AdventureDifficulty;
+  starTier?: StarTier; // when set: ends immediately upon reaching star goal
+  isHighScoreChallenge?: boolean;
   soundOn: boolean;
   onEnd: (result: GameResult) => void;
   onQuit: () => void;
 }
 
-const ADVANCE_MS = 250;
-const WRONG_FLASH_MS = 450;
+const ADVANCE_MS = 70;
+const WRONG_FLASH_MS = 220;
 
 const formatTime = (s: number) => {
   if (s >= 60) {
@@ -64,12 +72,16 @@ export const GameScreen = ({
   practiceFamily,
   targetScore,
   challenge,
+  starTier,
+  isHighScoreChallenge,
   soundOn,
   onEnd,
   onQuit,
 }: GameScreenProps) => {
   const isPractice = timer === "practice";
   const isChallenge = !!challenge;
+  const isStar = !!starTier;
+  const isHighScore = !!isHighScoreChallenge;
   const isEndlessTimer = timer === "endless";
   const isEndlessTarget = !targetScore || targetScore === "endless";
 
@@ -94,24 +106,21 @@ export const GameScreen = ({
   const [streak, setStreak] = useState(0);
   const [bestStreak, setBestStreak] = useState(0);
 
-  const totalSeconds =
-    isPractice || isEndlessTimer ? 0 : (timer as number);
+  const totalSeconds = isPractice || isEndlessTimer ? 0 : (timer as number);
   const [timeLeft, setTimeLeft] = useState<number>(totalSeconds);
 
+  const startMsRef = useRef<number>(Date.now());
   const lockedRef = useRef(false);
   const endedRef = useRef(false);
   const stateRef = useRef({ score: 0, wrong: 0, bestStreak: 0 });
   stateRef.current = { score, wrong, bestStreak };
 
-  const finish = (opts?: { targetReached?: boolean }) => {
+  const finish = (opts?: { targetReached?: boolean; starReached?: boolean }) => {
     if (endedRef.current) return;
     endedRef.current = true;
     const s = stateRef.current;
     const total = s.score + s.wrong;
-    let stars: 0 | 1 | 2 | 3 | undefined;
-    if (isChallenge) {
-      stars = s.score >= STAR_GOALS.gold ? 3 : s.score >= STAR_GOALS.silver ? 2 : s.score >= STAR_GOALS.bronze ? 1 : 0;
-    }
+    const elapsed = (Date.now() - startMsRef.current) / 1000;
     onEnd({
       score: s.score,
       total,
@@ -122,8 +131,11 @@ export const GameScreen = ({
       operation,
       targetReached: opts?.targetReached,
       targetScore,
-      challenge: challenge,
-      starsEarned: stars,
+      challenge,
+      highScoreChallenge: isHighScore,
+      starTier,
+      starEarned: !!opts?.starReached,
+      elapsedSeconds: isStar || isHighScore ? elapsed : undefined,
     });
   };
 
@@ -145,7 +157,12 @@ export const GameScreen = ({
   }, [isPractice, isEndlessTimer]);
 
   const advance = (justScored: boolean) => {
-    // Target reached?
+    // Star challenge: end the moment goal is reached
+    if (justScored && isStar && stateRef.current.score >= STAR_GOALS[starTier!]) {
+      finish({ starReached: true });
+      return;
+    }
+    // Custom target reached (regular game)
     if (
       justScored &&
       !isPractice &&
@@ -239,14 +256,16 @@ export const GameScreen = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [question, value, timeLeft, isPractice]);
 
-  const total$ = practiceSet.current.length;
-  const pct = isPractice ? Math.round((practiceIdx / total$) * 100) : 0;
+  const totalPractice = practiceSet.current.length;
+  const pct = isPractice ? Math.round((practiceIdx / totalPractice) * 100) : 0;
+  const starGoal = isStar ? STAR_GOALS[starTier!] : 0;
+  const tierColor = isStar ? STAR_COLORS[starTier!].fill : undefined;
 
   return (
     <div className="w-full max-w-2xl space-y-4 animate-soft-fade">
       <div className="flex items-center justify-between gap-3">
         <h2 className="text-xl sm:text-3xl font-extrabold text-gradient">
-          {isChallenge ? "Math Adventure" : "Hayley's Math Stars"}
+          {isStar ? `${STAR_COLORS[starTier!].label} Challenge` : isHighScore ? "High Score Challenge" : isChallenge ? "Daily Math Challenge" : "Math Stars"}
         </h2>
         <button
           onClick={onQuit}
@@ -263,7 +282,7 @@ export const GameScreen = ({
             <span>
               Family <span className="text-gradient">{practiceFamily}</span> ·{" "}
               <span className="text-gradient">
-                {practiceIdx + 1} / {total$}
+                {practiceIdx + 1} / {totalPractice}
               </span>
             </span>
             <span>
@@ -277,7 +296,7 @@ export const GameScreen = ({
               role="progressbar"
               aria-valuenow={practiceIdx}
               aria-valuemin={0}
-              aria-valuemax={total$}
+              aria-valuemax={totalPractice}
             />
           </div>
         </div>
@@ -287,12 +306,8 @@ export const GameScreen = ({
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full gradient-accent text-accent-foreground shadow-soft">
               <InfinityIcon className="size-4" /> Endless
             </span>
-            <span>
-              Score: <span className="text-gradient">{score}</span>
-            </span>
-            <span>
-              Accuracy: <span className="text-gradient">{calcAccuracy(score, score + wrong)}%</span>
-            </span>
+            <span>Score: <span className="text-gradient">{score}</span></span>
+            <span>Accuracy: <span className="text-gradient">{calcAccuracy(score, score + wrong)}%</span></span>
             <span className="inline-flex items-center gap-1">
               <Flame className="size-4 text-accent" /> {streak}
             </span>
@@ -307,14 +322,23 @@ export const GameScreen = ({
             timeLeft={timeLeft}
             totalTime={totalSeconds}
           />
-          <div className="flex items-center justify-between text-xs sm:text-sm font-bold text-muted-foreground px-1">
+          <div className="flex items-center justify-between text-xs sm:text-sm font-bold text-muted-foreground px-1 gap-2 flex-wrap">
             <span className="inline-flex items-center gap-1">
               <Flame className="size-4 text-accent" /> Streak {streak}{" "}
               <span className="opacity-70">· Best {bestStreak}</span>
             </span>
-            {isChallenge ? (
+            {isStar ? (
+              <span className="inline-flex items-center gap-1" style={{ color: tierColor }}>
+                <Star className="size-4" style={{ fill: tierColor, color: tierColor }} />
+                {score} / {starGoal}
+              </span>
+            ) : isHighScore ? (
               <span className="inline-flex items-center gap-1 text-accent-foreground">
-                <Sparkles className="size-4" /> Challenge · {challenge}
+                <Trophy className="size-4" /> High Score Run
+              </span>
+            ) : isChallenge ? (
+              <span className="inline-flex items-center gap-1">
+                <Sparkles className="size-4" /> {challenge}
               </span>
             ) : !isEndlessTarget ? (
               <span>
