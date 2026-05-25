@@ -1,4 +1,4 @@
-import { Sparkles, Volume2, VolumeX, Plus, Minus, X as XIcon, Divide, GraduationCap, Map } from "lucide-react";
+import { Sparkles, Volume2, VolumeX, Plus, Minus, X as XIcon, Divide, GraduationCap, Star } from "lucide-react";
 import {
   Difficulty,
   Operation,
@@ -9,6 +9,7 @@ import {
   TARGET_OPTIONS,
 } from "@/lib/game";
 import { ProfileSelector } from "./ProfileSelector";
+import { getProfileName } from "@/lib/profiles";
 
 interface SetupScreenProps {
   operation: Operation;
@@ -42,6 +43,8 @@ const difficulties: { id: Difficulty; label: string; cls: string }[] = [
   { id: "hard", label: "Hard", cls: "" },
 ];
 
+const possessive = (name: string) => `${name}${name.endsWith("s") ? "'" : "'s"}`;
+
 export const SetupScreen = ({
   operation,
   difficulty,
@@ -66,20 +69,26 @@ export const SetupScreen = ({
     return { easy: "1 – 10", medium: "1 – 20", hard: "1 – 50" }[d];
   };
 
+  const playerName = getProfileName(activeProfileId);
+  const title = `${possessive(playerName)} Math Stars`;
+
   return (
     <div className="w-full max-w-2xl gradient-card rounded-3xl shadow-card p-6 sm:p-10 animate-soft-fade">
       <ProfileSelector activeId={activeProfileId} onChange={onProfileChange} />
-      <div className="text-center mb-8">
+
+      <div className="text-center mb-6">
         <button
           onClick={onAdventure}
-          className="btn-3d btn-3d-accent inline-flex items-center gap-2 px-4 py-2 text-sm mb-4 shadow-glow"
+          className="btn-3d btn-3d-accent btn-shimmer inline-flex items-center gap-2 px-5 py-3 text-base sm:text-lg mb-5 shadow-glow font-extrabold"
         >
-          <Sparkles className="size-4" /> Math Adventure
+          <Star className="size-5 fill-current" strokeWidth={2} />
+          Daily Math Challenge
+          <Sparkles className="size-4" />
         </button>
-        <h1 className="text-4xl sm:text-6xl font-extrabold text-gradient mb-3 leading-tight">
-          Hayley's Math Stars
+        <h1 className="text-3xl sm:text-5xl font-extrabold text-gradient mb-2 leading-tight">
+          {title}
         </h1>
-        <p className="text-base sm:text-lg text-muted-foreground font-semibold max-w-md mx-auto">
+        <p className="text-sm sm:text-base text-muted-foreground font-semibold max-w-md mx-auto">
           Practice {OP_LABEL[operation].toLowerCase()} and beat your high score!
         </p>
         {highScore > 0 && (
@@ -204,14 +213,9 @@ export const SetupScreen = ({
       <button onClick={onStart} className="btn-3d w-full text-2xl py-5 mb-3">
         Start Game →
       </button>
-      <div className="grid grid-cols-2 gap-3">
-        <button onClick={onPracticeMode} className="btn-3d btn-3d-accent w-full text-base py-4">
-          <GraduationCap className="size-5" /> Practice
-        </button>
-        <button onClick={onAdventure} className="btn-3d btn-3d-secondary w-full text-base py-4">
-          <Map className="size-5" /> Adventure
-        </button>
-      </div>
+      <button onClick={onPracticeMode} className="btn-3d btn-3d-accent w-full text-base py-4">
+        <GraduationCap className="size-5" /> Practice
+      </button>
     </div>
   );
 };
