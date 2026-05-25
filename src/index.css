@@ -69,7 +69,32 @@
     from { opacity: 0; }
     to   { opacity: 1; }
   }
-  .animate-soft-fade { animation: soft-fade 0.18s ease-out both; }
+  .animate-soft-fade { animation: soft-fade 0.12s ease-out both; }
+
+  /* Gold shimmer sweep for the featured Daily Challenge button */
+  @keyframes shimmer-sweep {
+    0%   { transform: translateX(-150%) skewX(-20deg); }
+    60%  { transform: translateX(250%)  skewX(-20deg); }
+    100% { transform: translateX(250%)  skewX(-20deg); }
+  }
+  .btn-shimmer { position: relative; overflow: hidden; isolation: isolate; }
+  .btn-shimmer::after {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    width: 45%;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      hsl(48 100% 92% / 0.0) 20%,
+      hsl(48 100% 92% / 0.85) 50%,
+      hsl(48 100% 92% / 0.0) 80%,
+      transparent 100%
+    );
+    animation: shimmer-sweep 3.4s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 1;
+  }
 
   /* Dimensional 3D button */
   .btn-3d {
