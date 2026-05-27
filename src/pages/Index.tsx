@@ -156,6 +156,24 @@ const Index = () => {
     setHighScore(readNum(pkey(profileId, highScoreKey(operation, difficulty, timer)), 0));
   }, [profileId, operation, difficulty, timer]);
 
+  // Map screen -> background music track (gameplay screens stay silent)
+  useEffect(() => {
+    const map: Record<Screen, MusicTrack> = {
+      setup: "home",
+      classroom: "home",
+      practiceSetup: "learn",
+      learn: "learn",
+      adventure: "challenge",
+      calendar: "challenge",
+      results: "home",
+      game: null,
+      practice: null,
+      starChallenge: null,
+      hsChallenge: null,
+    };
+    setMusicTrack(map[screen]);
+  }, [screen]);
+
   const handleProfileChange = (id: string) => {
     if (id === "classroom") {
       setScreen("classroom");
