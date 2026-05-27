@@ -19,7 +19,7 @@ import {
   generateAdventureQuestion,
   generateQuestion,
 } from "@/lib/game";
-import { haptic, playCelebrate, playCorrect, playStar, playWrong } from "@/lib/audio";
+import { haptic, playCorrect, playStar, playWrong } from "@/lib/audio";
 
 export interface GameResult {
   score: number;

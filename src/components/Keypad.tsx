@@ -1,4 +1,5 @@
 import { Delete } from "lucide-react";
+import { haptic, playKeypad } from "@/lib/audio";
 
 interface KeypadProps {
   onDigit: (d: string) => void;
@@ -29,7 +30,11 @@ const Key = ({
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={() => {
+        playKeypad();
+        haptic("key");
+        onClick();
+      }}
       disabled={disabled}
       aria-label={ariaLabel}
       className={`${cls} h-14 sm:h-16 text-2xl sm:text-3xl select-none`}
