@@ -53,8 +53,8 @@ interface GameScreenProps {
   onQuit: () => void;
 }
 
-const ADVANCE_MS = 70;
-const WRONG_FLASH_MS = 220;
+const ADVANCE_MS = 35;
+const WRONG_FLASH_MS = 160;
 
 const formatTime = (s: number) => {
   if (s >= 60) {

@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { ArrowLeft, Check, Pencil, Users, X } from "lucide-react";
+import { ArrowLeft, Pencil, Users } from "lucide-react";
 import {
   ClassroomStudent,
   getClassroomStudents,
   setClassroomStudentName,
 } from "@/lib/profiles";
+import { RenameField } from "./RenameField";
 
 interface ClassroomScreenProps {
   onBack: () => void;
@@ -51,36 +52,13 @@ export const ClassroomScreen = ({ onBack, onPickStudent }: ClassroomScreenProps)
           const isEditing = editing === s.id;
           if (isEditing) {
             return (
-              <div
+              <RenameField
                 key={s.id}
-                className="rounded-2xl bg-background border-4 border-primary p-1.5 flex items-center gap-1"
-              >
-                <input
-                  autoFocus
-                  value={draft}
-                  onChange={(e) => setDraft(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") commit();
-                    if (e.key === "Escape") setEditing(null);
-                  }}
-                  className="min-w-0 flex-1 bg-transparent text-sm font-bold focus:outline-none px-1"
-                  maxLength={24}
-                />
-                <button
-                  onClick={commit}
-                  className="size-7 rounded-lg bg-success text-success-foreground inline-flex items-center justify-center"
-                  aria-label="Save"
-                >
-                  <Check className="size-4" strokeWidth={3} />
-                </button>
-                <button
-                  onClick={() => setEditing(null)}
-                  className="size-7 rounded-lg bg-muted inline-flex items-center justify-center"
-                  aria-label="Cancel"
-                >
-                  <X className="size-4" strokeWidth={3} />
-                </button>
-              </div>
+                value={draft}
+                onChange={setDraft}
+                onCommit={commit}
+                onCancel={() => setEditing(null)}
+              />
             );
           }
           return (
