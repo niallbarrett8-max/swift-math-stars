@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Pencil, User, Users, Check, X } from "lucide-react";
+import { Pencil, User, Users } from "lucide-react";
 import {
   PROFILE_IDS,
   getProfileName,
   isClassroomStudentId,
   setProfileName,
 } from "@/lib/profiles";
+import { RenameField } from "./RenameField";
 
 interface ProfileSelectorProps {
   activeId: string;
@@ -30,6 +31,7 @@ export const ProfileSelector = ({ activeId, onChange }: ProfileSelectorProps) =>
     }
     setEditing(null);
   };
+  const cancel = () => setEditing(null);
 
   return (
     <div className="w-full mb-4" key={bump}>
@@ -47,36 +49,13 @@ export const ProfileSelector = ({ activeId, onChange }: ProfileSelectorProps) =>
 
           if (isEditing) {
             return (
-              <div
+              <RenameField
                 key={id}
-                className="rounded-2xl bg-background border-4 border-primary p-1.5 flex items-center gap-1 col-span-1"
-              >
-                <input
-                  autoFocus
-                  value={draft}
-                  onChange={(e) => setDraft(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") commit();
-                    if (e.key === "Escape") setEditing(null);
-                  }}
-                  className="min-w-0 flex-1 bg-transparent text-sm font-bold focus:outline-none px-1"
-                  maxLength={24}
-                />
-                <button
-                  onClick={commit}
-                  className="size-7 rounded-lg bg-success text-success-foreground inline-flex items-center justify-center"
-                  aria-label="Save name"
-                >
-                  <Check className="size-4" strokeWidth={3} />
-                </button>
-                <button
-                  onClick={() => setEditing(null)}
-                  className="size-7 rounded-lg bg-muted inline-flex items-center justify-center"
-                  aria-label="Cancel"
-                >
-                  <X className="size-4" strokeWidth={3} />
-                </button>
-              </div>
+                value={draft}
+                onChange={setDraft}
+                onCommit={commit}
+                onCancel={cancel}
+              />
             );
           }
 
@@ -87,7 +66,7 @@ export const ProfileSelector = ({ activeId, onChange }: ProfileSelectorProps) =>
                 aria-pressed={active}
                 className={`btn-3d ${
                   active ? (isClass ? "btn-3d-secondary" : "") : "btn-3d-neutral opacity-80"
-                } ${active ? "btn-3d-active-ring" : ""} w-full flex-col py-2.5 text-sm`}
+                } ${active ? "btn-3d-active-ring" : ""} w-full flex-col py-2.5 text-sm min-h-[56px]`}
               >
                 {isClass ? (
                   <Users className="size-4" strokeWidth={3} />
@@ -102,10 +81,10 @@ export const ProfileSelector = ({ activeId, onChange }: ProfileSelectorProps) =>
                     e.stopPropagation();
                     startEdit(id);
                   }}
-                  className="absolute -top-1.5 -right-1.5 size-6 rounded-full bg-background border-2 border-border shadow-soft inline-flex items-center justify-center hover:border-primary"
+                  className="absolute -top-2 -right-2 size-7 rounded-full bg-background border-2 border-border shadow-soft inline-flex items-center justify-center hover:border-primary"
                   aria-label={`Rename ${name}`}
                 >
-                  <Pencil className="size-3" strokeWidth={3} />
+                  <Pencil className="size-3.5" strokeWidth={3} />
                 </button>
               )}
             </div>
