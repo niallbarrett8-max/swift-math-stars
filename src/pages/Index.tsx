@@ -7,6 +7,8 @@ import { LearnScreen } from "@/components/LearnScreen";
 import { AdventureScreen } from "@/components/AdventureScreen";
 import { CalendarScreen } from "@/components/CalendarScreen";
 import { ClassroomScreen } from "@/components/ClassroomScreen";
+import { SettingsPanel } from "@/components/SettingsPanel";
+import { MusicTrack, setMusicTrack } from "@/lib/audio";
 import {
   ADVENTURE_DURATION,
   AdventureDifficulty,
