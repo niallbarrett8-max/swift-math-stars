@@ -241,7 +241,7 @@ const Index = () => {
   };
 
   return (
-    <main className="min-h-screen w-full flex items-center justify-center p-4 sm:p-6">
+    <main className="min-h-screen w-full flex items-center justify-center p-4 sm:p-6 safe-pad">
       {screen === "setup" && (
         <SetupScreen
           operation={operation}

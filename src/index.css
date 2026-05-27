@@ -58,18 +58,31 @@
     background: var(--gradient-bg);
     background-attachment: fixed;
     font-family: 'Nunito', 'Comic Sans MS', system-ui, sans-serif;
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    overscroll-behavior-y: none;
   }
+  /* Prevent iOS Safari from auto-zooming text fields on focus */
+  input, textarea, select { font-size: 16px; }
   h1, h2, h3 { font-family: 'Fredoka', 'Nunito', system-ui, sans-serif; }
 }
 
 @layer utilities {
+  /* Respect notch / Dynamic Island / home indicator */
+  .safe-pad {
+    padding-top: max(1rem, env(safe-area-inset-top));
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+  }
   .gradient-bg { background: var(--gradient-bg); }
   /* Subtle, non-bouncy fade for swapping question content */
   @keyframes soft-fade {
     from { opacity: 0; }
     to   { opacity: 1; }
   }
-  .animate-soft-fade { animation: soft-fade 0.12s ease-out both; }
+  .animate-soft-fade { animation: soft-fade 0.08s ease-out both; }
 
   /* Gold shimmer sweep for the featured Daily Challenge button */
   @keyframes shimmer-sweep {
