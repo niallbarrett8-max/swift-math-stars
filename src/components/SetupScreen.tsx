@@ -9,6 +9,7 @@ import {
   TARGET_OPTIONS,
 } from "@/lib/game";
 import { ProfileSelector } from "./ProfileSelector";
+import { SettingsPanel } from "./SettingsPanel";
 import { getProfileName } from "@/lib/profiles";
 
 interface SetupScreenProps {
@@ -74,7 +75,12 @@ export const SetupScreen = ({
 
   return (
     <div className="w-full max-w-2xl gradient-card rounded-3xl shadow-card p-6 sm:p-10 animate-soft-fade">
-      <ProfileSelector activeId={activeProfileId} onChange={onProfileChange} />
+      <div className="flex items-start justify-between gap-3 mb-2">
+        <div className="flex-1 min-w-0">
+          <ProfileSelector activeId={activeProfileId} onChange={onProfileChange} />
+        </div>
+        <SettingsPanel />
+      </div>
 
       <div className="text-center mb-6">
         <button
