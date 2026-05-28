@@ -7,7 +7,7 @@ import { LearnScreen } from "@/components/LearnScreen";
 import { AdventureScreen } from "@/components/AdventureScreen";
 import { CalendarScreen } from "@/components/CalendarScreen";
 import { ClassroomScreen } from "@/components/ClassroomScreen";
-import { SettingsPanel } from "@/components/SettingsPanel";
+
 import { MusicTrack, setMusicTrack } from "@/lib/audio";
 import {
   ADVENTURE_DURATION,
@@ -262,7 +262,6 @@ const Index = () => {
 
   return (
     <main className="min-h-screen w-full flex items-center justify-center p-4 sm:p-6 safe-pad">
-      <SettingsPanel />
       {screen === "setup" && (
         <SetupScreen
           operation={operation}

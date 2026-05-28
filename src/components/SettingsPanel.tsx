@@ -46,9 +46,10 @@ export const SettingsPanel = () => {
         <button
           aria-label="Settings"
           onClick={() => haptic("button")}
-          className="fixed top-3 right-3 z-40 size-11 rounded-full bg-card/80 backdrop-blur border-2 border-border shadow-soft flex items-center justify-center text-foreground/80 hover:text-primary hover:border-primary/40 transition-all active:scale-95 safe-pad"
+          className="btn-3d btn-3d-neutral inline-flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm"
         >
-          <SettingsIcon className="size-5" />
+          <SettingsIcon className="size-4" />
+          Settings
         </button>
       </DialogTrigger>
       <DialogContent className="max-w-sm rounded-3xl p-5 sm:p-6 backdrop-blur">
