@@ -75,12 +75,8 @@ export const SetupScreen = ({
 
   return (
     <div className="w-full max-w-2xl gradient-card rounded-3xl shadow-card p-6 sm:p-10 animate-soft-fade">
-      <div className="flex items-start justify-between gap-3 mb-2">
-        <div className="flex-1 min-w-0">
-          <ProfileSelector activeId={activeProfileId} onChange={onProfileChange} />
-        </div>
-        <SettingsPanel />
-      </div>
+      <SettingsPanel />
+      <ProfileSelector activeId={activeProfileId} onChange={onProfileChange} />
 
       <div className="text-center mb-6">
         <button
