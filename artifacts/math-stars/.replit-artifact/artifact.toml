@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "MathStars"
+version = "1.0.0"
+id = "artifacts/math-stars"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21261
+
+[services.development]
+run = "pnpm --filter @workspace/math-stars run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/math-stars", "run", "build" ]
+publicDir = "artifacts/math-stars/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21261"
+BASE_PATH = "/"
