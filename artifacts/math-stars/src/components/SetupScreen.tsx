@@ -74,8 +74,10 @@ export const SetupScreen = ({
   const title = `${possessive(playerName)} Math Stars`;
 
   return (
-    <div className="w-full max-w-2xl gradient-card rounded-3xl shadow-card p-6 sm:p-10 animate-soft-fade">
-      <SettingsPanel />
+    <div className="relative w-full max-w-2xl gradient-card rounded-3xl shadow-card p-6 sm:p-10 animate-soft-fade">
+      <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-10">
+        <SettingsPanel />
+      </div>
       <ProfileSelector activeId={activeProfileId} onChange={onProfileChange} />
 
       <div className="text-center mb-6">

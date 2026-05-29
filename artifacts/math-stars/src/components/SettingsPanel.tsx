@@ -41,101 +41,99 @@ export const SettingsPanel = () => {
   const s = useAudioSettings();
 
   return (
-    <div className="fixed top-4 right-4 z-50">
-      <Dialog>
-        <DialogTrigger asChild>
-          <button
-            aria-label="Settings"
-            onClick={() => haptic("button")}
-            className="size-11 rounded-full bg-white/80 backdrop-blur border-2 border-white shadow-card flex items-center justify-center text-primary hover:scale-110 active:scale-95 transition-transform"
+    <Dialog>
+      <DialogTrigger asChild>
+        <button
+          aria-label="Settings"
+          onClick={() => haptic("button")}
+          className="size-9 rounded-full inline-flex items-center justify-center text-muted-foreground hover:text-primary hover:scale-110 active:scale-95 transition-all"
+        >
+          <SettingsIcon className="size-5" strokeWidth={2.5} />
+        </button>
+      </DialogTrigger>
+      <DialogContent className="max-w-sm rounded-3xl p-5 sm:p-6 backdrop-blur">
+        <DialogHeader>
+          <DialogTitle className="text-xl font-extrabold text-gradient">
+            Settings
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="mt-2">
+          <Row
+            icon={<Music className="size-5" />}
+            label="Music"
+            hint="Soft background music in menus"
           >
-            <SettingsIcon className="size-5" strokeWidth={2.5} />
-          </button>
-        </DialogTrigger>
-        <DialogContent className="max-w-sm rounded-3xl p-5 sm:p-6 backdrop-blur">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-extrabold text-gradient">
-              Settings
-            </DialogTitle>
-          </DialogHeader>
+            <Switch
+              checked={s.musicOn}
+              onCheckedChange={(v) => {
+                haptic("button");
+                updateAudioSettings({ musicOn: v });
+              }}
+            />
+          </Row>
 
-          <div className="mt-2">
-            <Row
-              icon={<Music className="size-5" />}
-              label="Music"
-              hint="Soft background music in menus"
-            >
-              <Switch
-                checked={s.musicOn}
-                onCheckedChange={(v) => {
-                  haptic("button");
-                  updateAudioSettings({ musicOn: v });
-                }}
-              />
-            </Row>
-
-            {s.musicOn && (
-              <div className="px-1 pt-1 pb-3 border-b border-border">
-                <div className="flex items-center justify-between text-xs font-bold text-muted-foreground mb-2">
-                  <span>Music volume</span>
-                  <span>{Math.round(s.musicVolume * 100)}%</span>
-                </div>
-                <Slider
-                  value={[Math.round(s.musicVolume * 100)]}
-                  min={0}
-                  max={100}
-                  step={1}
-                  onValueChange={(vals) =>
-                    updateAudioSettings({ musicVolume: (vals[0] ?? 0) / 100 })
-                  }
-                />
+          {s.musicOn && (
+            <div className="px-1 pt-1 pb-3 border-b border-border">
+              <div className="flex items-center justify-between text-xs font-bold text-muted-foreground mb-2">
+                <span>Music volume</span>
+                <span>{Math.round(s.musicVolume * 100)}%</span>
               </div>
-            )}
-
-            <Row
-              icon={<Volume2 className="size-5" />}
-              label="Sound Effects"
-              hint="Correct, wrong, menu & rewards"
-            >
-              <Switch
-                checked={s.sfxOn}
-                onCheckedChange={(v) => {
-                  haptic("button");
-                  updateAudioSettings({ sfxOn: v });
-                }}
+              <Slider
+                value={[Math.round(s.musicVolume * 100)]}
+                min={0}
+                max={100}
+                step={1}
+                onValueChange={(vals) =>
+                  updateAudioSettings({ musicVolume: (vals[0] ?? 0) / 100 })
+                }
               />
-            </Row>
+            </div>
+          )}
 
-            <Row
-              icon={<Hash className="size-5" />}
-              label="Keypad Sounds"
-              hint="Tap sound while typing"
-            >
-              <Switch
-                checked={s.keypadOn}
-                onCheckedChange={(v) => {
-                  haptic("button");
-                  updateAudioSettings({ keypadOn: v });
-                }}
-              />
-            </Row>
+          <Row
+            icon={<Volume2 className="size-5" />}
+            label="Sound Effects"
+            hint="Correct, wrong, menu & rewards"
+          >
+            <Switch
+              checked={s.sfxOn}
+              onCheckedChange={(v) => {
+                haptic("button");
+                updateAudioSettings({ sfxOn: v });
+              }}
+            />
+          </Row>
 
-            <Row
-              icon={<Vibrate className="size-5" />}
-              label="Haptics"
-              hint="Subtle vibration feedback"
-            >
-              <Switch
-                checked={s.hapticsOn}
-                onCheckedChange={(v) => {
-                  updateAudioSettings({ hapticsOn: v });
-                  if (v) haptic("button");
-                }}
-              />
-            </Row>
-          </div>
-        </DialogContent>
-      </Dialog>
-    </div>
+          <Row
+            icon={<Hash className="size-5" />}
+            label="Keypad Sounds"
+            hint="Tap sound while typing"
+          >
+            <Switch
+              checked={s.keypadOn}
+              onCheckedChange={(v) => {
+                haptic("button");
+                updateAudioSettings({ keypadOn: v });
+              }}
+            />
+          </Row>
+
+          <Row
+            icon={<Vibrate className="size-5" />}
+            label="Haptics"
+            hint="Subtle vibration feedback"
+          >
+            <Switch
+              checked={s.hapticsOn}
+              onCheckedChange={(v) => {
+                updateAudioSettings({ hapticsOn: v });
+                if (v) haptic("button");
+              }}
+            />
+          </Row>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };

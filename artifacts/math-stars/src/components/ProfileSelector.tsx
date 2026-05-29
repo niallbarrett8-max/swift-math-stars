@@ -20,6 +20,9 @@ export const ProfileSelector = ({ activeId, onChange }: ProfileSelectorProps) =>
   const [draft, setDraft] = useState("");
   const [bump, setBump] = useState(0);
   const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Always-present hidden input — focused on pointerdown so iOS raises
+  // the keyboard during the touch event, before the rename field mounts.
+  const hiddenInputRef = useRef<HTMLInputElement>(null);
 
   const activeBaseId = activeId.startsWith("classroom") ? "classroom" : activeId;
 
@@ -39,6 +42,12 @@ export const ProfileSelector = ({ activeId, onChange }: ProfileSelectorProps) =>
   const cancel = () => setEditing(null);
 
   const startPress = (id: string) => {
+    // Focus the hidden input immediately (synchronously within the touch event)
+    // so iOS sees a direct user-gesture and raises the keyboard. When the
+    // RenameField mounts 500 ms later and its useEffect fires focus(), the
+    // keyboard is already up and transfers smoothly to the real input.
+    try { hiddenInputRef.current?.focus(); } catch (_) { /* ignore */ }
+
     pressTimer.current = setTimeout(() => {
       pressTimer.current = null;
       startEdit(id);
@@ -50,17 +59,40 @@ export const ProfileSelector = ({ activeId, onChange }: ProfileSelectorProps) =>
       clearTimeout(pressTimer.current);
       pressTimer.current = null;
     }
+    // Blur the hidden input if rename didn't open (tap ended early).
+    if (!editing) {
+      try { hiddenInputRef.current?.blur(); } catch (_) { /* ignore */ }
+    }
   };
 
-  const handleClick = (id: string) => {
+  const handlePointerUp = (id: string) => {
     if (pressTimer.current !== null) {
+      // Short tap — cancel long press and select profile.
       cancelPress();
       onChange(id);
     }
+    // If pressTimer is null, long press already fired → do nothing here.
   };
 
   return (
     <div className="w-full mb-4" key={bump}>
+      {/* Hidden input — keeps the iOS keyboard open across the 500 ms gap */}
+      <input
+        ref={hiddenInputRef}
+        type="text"
+        aria-hidden="true"
+        tabIndex={-1}
+        readOnly
+        style={{
+          position: "absolute",
+          opacity: 0,
+          pointerEvents: "none",
+          width: 1,
+          height: 1,
+          fontSize: 16,
+        }}
+      />
+
       <div className="mb-2">
         <span className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
           Playing as
@@ -89,8 +121,9 @@ export const ProfileSelector = ({ activeId, onChange }: ProfileSelectorProps) =>
             <button
               key={id}
               onPointerDown={() => startPress(id)}
-              onPointerUp={() => handleClick(id)}
+              onPointerUp={() => handlePointerUp(id)}
               onPointerLeave={cancelPress}
+              onPointerCancel={cancelPress}
               onContextMenu={(e) => {
                 e.preventDefault();
                 cancelPress();
@@ -100,7 +133,7 @@ export const ProfileSelector = ({ activeId, onChange }: ProfileSelectorProps) =>
               aria-label={`Select ${name}. Long press to rename.`}
               className={`btn-3d ${
                 active ? "btn-3d-active-ring" : "btn-3d-neutral opacity-80"
-              } flex-col py-4 text-sm min-h-[68px] w-full select-none`}
+              } flex-col py-4 text-sm min-h-[68px] w-full select-none touch-none`}
             >
               <User className="size-5 mb-1" strokeWidth={3} />
               <span className="truncate max-w-full px-1 font-bold">{name}</span>
