@@ -516,13 +516,40 @@ const playTactile = (duration = 0.04, cutoff = 650, peak = 0.08) => {
 
 export const playKeypad = () => {
   if (!settings.keypadOn) return;
-  playTactile(0.035, 700, 0.06);
+  const c = getCtx();
+  const buf = getNoise();
+  if (!c || !buf) return;
+  const now = c.currentTime;
+  const src = c.createBufferSource();
+  src.buffer = buf;
+  const offset = Math.random() * Math.max(0, buf.duration - 0.03);
+
+  // High-pass removes low-end thump; low-pass removes harsh treble.
+  // Together they produce a clean mid-range click — crisp, not drum-like.
+  const hp = c.createBiquadFilter();
+  hp.type = "highpass";
+  hp.frequency.value = 700;
+  hp.Q.value = 0.5;
+
+  const lp = c.createBiquadFilter();
+  lp.type = "lowpass";
+  lp.frequency.value = 4000;
+  lp.Q.value = 0.6;
+
+  const g = c.createGain();
+  g.gain.setValueAtTime(0, now);
+  g.gain.linearRampToValueAtTime(0.045, now + 0.001);
+  g.gain.exponentialRampToValueAtTime(0.0005, now + 0.022);
+
+  src.connect(hp).connect(lp).connect(g).connect(c.destination);
+  src.start(now, offset);
+  src.stop(now + 0.028);
 };
 
 // ============================================================
 // Haptics
 // ============================================================
-type HapticKind = "key" | "tap" | "correct" | "star" | "button";
+type HapticKind = "key" | "tap" | "correct" | "wrong" | "star" | "button";
 
 export const haptic = (kind: HapticKind = "tap") => {
   if (!settings.hapticsOn) return;
@@ -533,7 +560,8 @@ export const haptic = (kind: HapticKind = "tap") => {
     key: 8,
     tap: 10,
     button: 14,
-    correct: 18,
+    correct: 14,
+    wrong: [18, 6, 18],
     star: [12, 40, 18],
   };
   try {

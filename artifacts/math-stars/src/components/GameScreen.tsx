@@ -222,6 +222,7 @@ export const GameScreen = ({
       setStreak(0);
       setFeedback({ type: "wrong", correctAnswer: correct });
       playWrong();
+      haptic("wrong");
       window.setTimeout(() => {
         setValue("");
         setFeedback(null);

@@ -33,12 +33,14 @@ const readNum = (key: string): number | null => {
   return Number.isFinite(n) ? n : null;
 };
 
-export const isTierUnlocked = (profileId: string, tier: StarTier): boolean => {
+export const isTierUnlocked = (profileId: string, tier: StarTier, today: string): boolean => {
   if (tier === "bronze") return true;
   if (typeof window === "undefined") return false;
+  // Daily reset: Silver only unlocked if Bronze was completed TODAY
   if (tier === "silver")
-    return window.localStorage.getItem(pkey(profileId, tierUnlockedKey("bronze"))) === "1";
-  return window.localStorage.getItem(pkey(profileId, tierUnlockedKey("silver"))) === "1";
+    return window.localStorage.getItem(pkey(profileId, starTimeKey(today, "bronze"))) !== null;
+  // Gold only unlocked if Silver was completed TODAY
+  return window.localStorage.getItem(pkey(profileId, starTimeKey(today, "silver"))) !== null;
 };
 
 const TIER_FILTER: Record<StarTier, string> = {
@@ -91,7 +93,7 @@ export const AdventureScreen = ({
 
   const starInfo = (tier: StarTier) => {
     const time = readNum(pkey(profileId, starTimeKey(today, tier)));
-    const unlocked = isTierUnlocked(profileId, tier);
+    const unlocked = isTierUnlocked(profileId, tier, today);
     const earnedToday = time !== null;
     return { time, unlocked, earnedToday };
   };

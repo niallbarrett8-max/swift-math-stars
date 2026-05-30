@@ -69,7 +69,7 @@ const readTarget = (profileId: string): TargetScore => {
   const v = readStr(pkey(profileId, STORAGE_KEYS.target), "endless");
   if (v === "endless") return "endless";
   const n = Number(v);
-  if ([10, 25, 50, 100].includes(n)) return n as TargetScore;
+  if ([10, 25, 50, 75, 100].includes(n)) return n as TargetScore;
   return "endless";
 };
 
@@ -408,6 +408,16 @@ const Index = () => {
               startGame();
             }
           }}
+          onNextTier={
+            result.starEarned && result.starTier
+              ? () => {
+                  const diff = result.challenge ?? adventureDiff;
+                  if (result.starTier === "bronze") startStar(diff, "silver");
+                  else if (result.starTier === "silver") startStar(diff, "gold");
+                  else startHighScore(diff);
+                }
+              : undefined
+          }
           onChooseAnother={
             result.practice ? () => setScreen("practiceSetup") : undefined
           }

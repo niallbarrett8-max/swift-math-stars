@@ -1,0 +1,231 @@
+Math Stars – UI, Progression, Audio & Haptics Polish Pass
+
+Before making any changes:
+
+* Inspect the existing implementation first.
+* Preserve all current gameplay functionality.
+* Do not modify scoring, timers, star requirements, unlock thresholds, player profiles, classroom functionality, save data, or game rules unless specifically required below.
+* Only change code that is necessary to complete the requested tasks.
+
+⸻
+
+1. CLEAR BUTTON TEXT
+
+⸻
+
+In both Game Play Mode and Practice Mode:
+
+* Change the orange “C” (Clear) button text to BLACK.
+* This should be the ONLY orange button in the app that uses black text.
+* All other orange buttons throughout the app should continue using WHITE text.
+
+⸻
+
+2. MENU BACKGROUND CONTRAST
+
+⸻
+
+Current issue:
+
+The white cards, panels, and buttons blend into the menu background too much.
+
+Please improve visual separation while keeping the clean, modern design.
+
+Preferred solution:
+
+* Slightly adjust the menu background colour so it contrasts better with white elements.
+* Keep the change subtle and professional.
+
+Alternative solution:
+
+* Slightly tint white cards/panels with a very light off-white shade.
+
+Goal:
+
+Improve readability and visual hierarchy without making the UI feel busy or cluttered.
+
+⸻
+
+3. STAR COMPLETION SCREEN
+
+⸻
+
+Current behaviour:
+
+After earning a star, the screen displays:
+
+* “Bronze Star Earned”
+* “Bronze Unlocked”
+
+The second message feels redundant.
+
+Please replace or remove the secondary text.
+
+Examples:
+
+* Awesome!
+* Great Job!
+* Well Done!
+* Nice Work!
+
+Or remove the secondary text completely if the screen looks cleaner.
+
+Apply the same improvement to:
+
+* Bronze completion
+* Silver completion
+* Gold completion
+
+⸻
+
+4. NEXT CHALLENGE FLOW
+
+⸻
+
+Current buttons:
+
+* Play Again
+* Main Menu
+
+Please improve progression flow.
+
+After earning Bronze:
+
+Replace “Play Again” with:
+
+* Play Silver Challenge
+
+After earning Silver:
+
+Replace “Play Again” with:
+
+* Play Gold Challenge
+
+After earning Gold:
+
+Replace “Play Again” with:
+
+* Play 60-Second Challenge
+
+Keep:
+
+* Main Menu
+
+Goal:
+
+Encourage players to naturally progress through the challenge sequence.
+
+⸻
+
+5. DAILY MATH CHALLENGE AUDIT FIRST
+
+⸻
+
+IMPORTANT:
+
+Before making ANY changes to Daily Math Challenge progression, audit the existing implementation and determine whether it is already functioning correctly.
+
+Expected behaviour:
+
+Each new calendar day:
+
+* Only Bronze is initially available.
+* Silver remains locked until Bronze is completed.
+* Gold remains locked until Silver is completed.
+
+Progression:
+
+* Complete Bronze → unlock Silver
+* Complete Silver → unlock Gold
+
+This should reset every day.
+
+Please verify this behaviour for:
+
+Home Mode:
+
+* Players 1–4
+
+Classroom Mode:
+
+* Players 1–30
+
+If the current implementation already works correctly:
+
+* Make NO changes.
+
+Only modify code if the system is missing functionality or behaving incorrectly.
+
+⸻
+
+6. HAPTIC FEEDBACK
+
+⸻
+
+Current behaviour:
+
+* Incorrect answers provide a subtle haptic response.
+* Correct answers have little or no noticeable haptic feedback.
+
+Please add a subtle positive haptic response for correct answers.
+
+Requirements:
+
+* Slightly lighter than the incorrect-answer haptic.
+* Quick and satisfying.
+* Similar to modern native mobile success feedback.
+* Do not make it strong or distracting.
+
+⸻
+
+7. BUTTON / KEYPAD SOUND IMPROVEMENTS
+
+⸻
+
+Current keypad sounds feel heavy and drum-like.
+
+Replace them with a cleaner interaction sound.
+
+Desired characteristics:
+
+* Light
+* Crisp
+* Clean
+* Modern
+* Subtle
+
+Apply consistently to:
+
+* Number pad buttons
+* Menu buttons
+* Name entry
+* Player name editing
+* Text input interactions
+* Any primary button press
+
+Do not attempt to copy proprietary iPhone sounds directly.
+
+Instead, use a lightweight click/tap sound inspired by modern smartphone keyboard interactions.
+
+⸻
+
+8. AMBIENT AUDIO
+
+⸻
+
+Do NOT redesign ambient background audio yet.
+
+Leave ambient music unchanged for this update.
+
+A separate ambient-audio redesign pass will be completed later.
+
+⸻
+
+COMPLETION REPORT
+
+When finished, provide a summary containing:
+
+1. Changes made.
+2. Features inspected and verified without changes.
+3. Any areas requiring manual testing.
+4. Any limitations or concerns discovered during implementation.

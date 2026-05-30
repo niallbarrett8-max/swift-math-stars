@@ -1,5 +1,5 @@
 import { ConfettiCelebration } from "./ConfettiCelebration";
-import { Trophy, RotateCcw, Home, Sparkles, Hash, Play, Star, Clock } from "lucide-react";
+import { Trophy, RotateCcw, Home, Sparkles, Hash, Play, Star, Clock, ChevronRight } from "lucide-react";
 import {
   AdventureDifficulty,
   OP_LABEL,
@@ -27,10 +27,23 @@ interface ResultsScreenProps {
   highScoreChallenge?: boolean;
   elapsedSeconds?: number;
   onPlayAgain: () => void;
+  onNextTier?: () => void;
   onContinue?: () => void;
   onChooseAnother?: () => void;
   onHome: () => void;
 }
+
+const STAR_CHEER: Record<StarTier, string> = {
+  bronze: "Well Done!",
+  silver: "Awesome!",
+  gold: "Incredible!",
+};
+
+const NEXT_TIER_LABEL: Record<StarTier, string> = {
+  bronze: "Play Silver Challenge",
+  silver: "Play Gold Challenge",
+  gold: "Play 60-Second Run",
+};
 
 export const ResultsScreen = ({
   score,
@@ -49,6 +62,7 @@ export const ResultsScreen = ({
   highScoreChallenge,
   elapsedSeconds,
   onPlayAgain,
+  onNextTier,
   onContinue,
   onChooseAnother,
   onHome,
@@ -74,11 +88,11 @@ export const ResultsScreen = ({
             {starEarned ? `${STAR_COLORS[starTier].label} Star Earned!` : `${STAR_COLORS[starTier].label} Challenge`}
           </div>
         ) : highScoreChallenge ? (
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full gradient-accent text-accent-foreground font-extrabold text-sm mb-4 shadow-glow">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full gradient-accent text-white font-extrabold text-sm mb-4 shadow-glow">
             <Trophy className="size-4" /> High Score Run Complete
           </div>
         ) : challenge ? (
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full gradient-accent text-accent-foreground font-extrabold text-sm mb-4 shadow-glow">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full gradient-accent text-white font-extrabold text-sm mb-4 shadow-glow">
             <Sparkles className="size-4" /> Challenge Complete!
           </div>
         ) : targetReached ? (
@@ -90,7 +104,7 @@ export const ResultsScreen = ({
             Practice Complete! · {OP_LABEL[operation]} {family && `· Family ${family}`}
           </div>
         ) : isNewHighScore ? (
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full gradient-accent text-accent-foreground font-extrabold text-sm mb-4 shadow-glow animate-pulse">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full gradient-accent text-white font-extrabold text-sm mb-4 shadow-glow animate-pulse">
             <Sparkles className="size-4" /> NEW PERSONAL BEST!
           </div>
         ) : (
@@ -104,11 +118,11 @@ export const ResultsScreen = ({
             <div className="flex items-center justify-center mb-2">
               <Star
                 className="size-24"
-                strokeWidth={2}
+                strokeWidth={1.5}
                 style={{
-                  color: starEarned ? tierColor : "hsl(var(--muted-foreground) / 0.4)",
+                  color: starEarned ? STAR_COLORS[starTier].stroke : "hsl(var(--muted-foreground) / 0.4)",
                   fill: starEarned ? tierColor : "transparent",
-                  filter: starEarned ? `drop-shadow(0 4px 16px ${tierColor})` : undefined,
+                  filter: starEarned ? `drop-shadow(0 4px 20px ${tierColor})` : undefined,
                 }}
               />
             </div>
@@ -122,7 +136,7 @@ export const ResultsScreen = ({
           )}
           <h2 className="text-3xl sm:text-4xl font-extrabold mb-1">
             {starEarned
-              ? `${STAR_COLORS[starTier!].label} unlocked!`
+              ? STAR_CHEER[starTier!]
               : targetReached
                 ? "You did it!"
                 : isNewHighScore
@@ -143,7 +157,7 @@ export const ResultsScreen = ({
             <div className="text-3xl sm:text-4xl font-extrabold">{accuracy}%</div>
             <div className="text-xs sm:text-sm font-bold opacity-90 mt-1">ACCURACY</div>
           </div>
-          <div className="rounded-2xl gradient-accent text-accent-foreground p-4 shadow-soft">
+          <div className="rounded-2xl gradient-accent text-white p-4 shadow-soft">
             <div className="text-3xl sm:text-4xl font-extrabold">{bestStreak}</div>
             <div className="text-xs sm:text-sm font-bold opacity-90 mt-1">BEST STREAK</div>
           </div>
@@ -174,7 +188,15 @@ export const ResultsScreen = ({
               <Play className="size-5" /> Continue Playing
             </button>
           )}
-          <button onClick={onPlayAgain} className="btn-3d w-full text-lg py-4">
+          {starEarned && onNextTier && starTier && (
+            <button onClick={onNextTier} className="btn-3d btn-3d-success w-full text-lg py-4">
+              <ChevronRight className="size-5" /> {NEXT_TIER_LABEL[starTier]}
+            </button>
+          )}
+          <button
+            onClick={onPlayAgain}
+            className={`btn-3d ${starEarned ? "btn-3d-neutral" : ""} w-full text-lg py-4`}
+          >
             <RotateCcw className="size-5" /> {practice ? "Practice Again" : "Play Again"}
           </button>
           {practice && onChooseAnother && (

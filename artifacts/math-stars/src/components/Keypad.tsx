@@ -14,12 +14,14 @@ const Key = ({
   variant = "primary",
   ariaLabel,
   disabled,
+  extraClass = "",
 }: {
   children: React.ReactNode;
   onClick: () => void;
   variant?: "primary" | "neutral" | "accent";
   ariaLabel?: string;
   disabled?: boolean;
+  extraClass?: string;
 }) => {
   const cls =
     variant === "neutral"
@@ -37,7 +39,7 @@ const Key = ({
       }}
       disabled={disabled}
       aria-label={ariaLabel}
-      className={`${cls} h-14 sm:h-16 text-2xl sm:text-3xl select-none`}
+      className={`${cls} h-14 sm:h-16 text-2xl sm:text-3xl select-none ${extraClass}`}
     >
       {children}
     </button>
@@ -53,7 +55,7 @@ export const Keypad = ({ onDigit, onDelete, onClear, disabled }: KeypadProps) =>
           {d}
         </Key>
       ))}
-      <Key onClick={onClear} variant="accent" ariaLabel="Clear" disabled={disabled}>
+      <Key onClick={onClear} variant="accent" ariaLabel="Clear" disabled={disabled} extraClass="!text-black">
         C
       </Key>
       <Key onClick={() => onDigit("0")} ariaLabel="Digit 0" disabled={disabled}>
