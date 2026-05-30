@@ -1,6 +1,6 @@
 export type Difficulty = "easy" | "medium" | "hard";
 export type TimerOption = 30 | 60 | 120 | 300 | 600 | "endless";
-export type TargetScore = 10 | 25 | 50 | 100 | "endless";
+export type TargetScore = 10 | 25 | 50 | 75 | 100 | "endless";
 export type Operation = "add" | "sub" | "mul" | "div";
 export type AdventureDifficulty = "easy" | "medium" | "hard";
 export type StarTier = "bronze" | "silver" | "gold";
@@ -58,8 +58,9 @@ export const TARGET_OPTIONS: { value: TargetScore; label: string }[] = [
   { value: 10, label: "10" },
   { value: 25, label: "25" },
   { value: 50, label: "50" },
+  { value: 75, label: "75" },
   { value: 100, label: "100" },
-  { value: "endless", label: "♾️ Endless" },
+  { value: "endless", label: "♾️" },
 ];
 
 export const highScoreKey = (op: Operation, diff: Difficulty, timer: TimerOption) =>
@@ -193,7 +194,7 @@ export const adventureDayKey = (date: string, diff: AdventureDifficulty) =>
 
 // Star tier visual colors (HSL components for inline styling).
 export const STAR_COLORS: Record<StarTier, { fill: string; stroke: string; label: string }> = {
-  bronze: { fill: "hsl(25 75% 50%)", stroke: "hsl(25 75% 35%)", label: "Bronze" },
-  silver: { fill: "hsl(220 12% 75%)", stroke: "hsl(220 12% 50%)", label: "Silver" },
-  gold: { fill: "hsl(45 100% 55%)", stroke: "hsl(40 90% 40%)", label: "Gold" },
+  bronze: { fill: "hsl(22 90% 56%)", stroke: "hsl(22 80% 36%)", label: "Bronze" },
+  silver: { fill: "hsl(210 30% 86%)", stroke: "hsl(210 25% 58%)", label: "Silver" },
+  gold: { fill: "hsl(42 100% 60%)", stroke: "hsl(38 90% 40%)", label: "Gold" },
 };

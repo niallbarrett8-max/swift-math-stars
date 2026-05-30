@@ -1,4 +1,4 @@
-import { Sparkles, Volume2, VolumeX, Plus, Minus, X as XIcon, Divide, GraduationCap, Star } from "lucide-react";
+import { Sparkles, Plus, Minus, X as XIcon, Divide, GraduationCap, Star } from "lucide-react";
 import {
   Difficulty,
   Operation,
@@ -85,9 +85,13 @@ export const SetupScreen = ({
           onClick={onAdventure}
           className="btn-3d btn-3d-accent btn-shimmer inline-flex items-center gap-2 px-5 py-3 text-base sm:text-lg mb-5 shadow-glow font-extrabold"
         >
-          <Star className="size-5 fill-current" strokeWidth={2} />
+          <Star
+            className="size-5"
+            style={{ fill: "hsl(48 100% 88%)", color: "hsl(38 90% 55%)" }}
+            strokeWidth={2}
+          />
           Daily Math Challenge
-          <Sparkles className="size-4" />
+          <Sparkles className="size-4" style={{ color: "hsl(48 100% 90%)" }} />
         </button>
         <h1 className="text-3xl sm:text-5xl font-extrabold text-gradient mb-2 leading-tight">
           {title}
@@ -173,7 +177,7 @@ export const SetupScreen = ({
 
       <section className="mb-6">
         <h2 className="text-lg font-extrabold mb-3">Choose target score</h2>
-        <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-3">
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-3">
           {TARGET_OPTIONS.map((t) => {
             const active = target === t.value;
             return (
@@ -191,28 +195,6 @@ export const SetupScreen = ({
           })}
         </div>
       </section>
-
-      <button
-        onClick={onToggleSound}
-        className="w-full mb-6 flex items-center justify-between gap-3 rounded-2xl bg-background border-4 border-border px-5 py-3 font-bold hover:border-primary/40 transition-all"
-        aria-pressed={soundOn}
-      >
-        <span className="flex items-center gap-3">
-          {soundOn ? (
-            <Volume2 className="size-5 text-primary" />
-          ) : (
-            <VolumeX className="size-5 text-muted-foreground" />
-          )}
-          Sound effects
-        </span>
-        <span
-          className={`text-sm px-3 py-1 rounded-full font-extrabold ${
-            soundOn ? "gradient-success text-white" : "bg-muted text-muted-foreground"
-          }`}
-        >
-          {soundOn ? "ON" : "OFF"}
-        </span>
-      </button>
 
       <button onClick={onStart} className="btn-3d w-full text-2xl py-5 mb-3">
         Start Game →

@@ -1,0 +1,46 @@
+Perform a visual polish pass across the Home Screen and menu screens while preserving the existing MathStars style and functionality.
+
+1. Orange button text consistency
+
+* Change text on orange buttons throughout menu screens from black to white for better contrast and consistency.
+* This includes buttons such as Daily Math Challenge and other orange menu buttons.
+* Do not change the orange “C” box within active game screens. Leave that exactly as it is.
+
+2. Daily Math Challenge button styling
+
+* The Daily Math Challenge button currently uses black star icons that feel out of place with the app’s colorful design.
+* Replace the black stars with colors that better match the MathStars visual theme.
+* Keep the button playful, polished, and consistent with the rest of the Home Screen.
+
+3. Remove redundant Sound Effects section
+
+* Remove the dedicated Sound Effects panel and on/off slider from the Home Screen.
+* Sound settings are now accessed through the gear icon in the top-right corner.
+* After removal, rebalance spacing so the layout remains clean and intentional.
+
+4. Choose Target Score symmetry
+
+* Add a new target score option of 75.
+* Change the options from:
+    10, 25, 50, 100, Endless
+    to:
+    10, 25, 50, 75, 100, Endless
+* Arrange the buttons so the layout feels visually balanced and symmetrical.
+
+5. Background and contrast polish
+
+* Review all main menu screens:
+    * Home Screen
+    * Practice
+    * Adventure
+    * Classroom
+* The current white background makes some white UI elements blend in.
+* Improve visual contrast while maintaining a colorful, playful, child-friendly appearance.
+* Use your best design judgment to create a more premium and cohesive look that fits MathStars.
+
+6. Daily Math Challenge star rewards
+
+* Improve the appearance of the Bronze, Silver, and Gold stars.
+* Silver should look noticeably metallic rather than dull gray.
+* All three stars should feel more premium, rewarding, and visually exciting for children.
+* Preserve the existing star progression system and functionality.

@@ -41,18 +41,27 @@ export const isTierUnlocked = (profileId: string, tier: StarTier): boolean => {
   return window.localStorage.getItem(pkey(profileId, tierUnlockedKey("silver"))) === "1";
 };
 
+const TIER_FILTER: Record<StarTier, string> = {
+  bronze:
+    "drop-shadow(0 0 5px hsl(22 100% 72%)) drop-shadow(0 3px 8px hsl(22 90% 40% / 0.65))",
+  silver:
+    "drop-shadow(0 1px 2px hsl(0 0% 100% / 0.95)) drop-shadow(0 2px 7px hsl(210 30% 65% / 0.65)) drop-shadow(0 0 12px hsl(210 40% 82% / 0.5))",
+  gold:
+    "drop-shadow(0 0 8px hsl(45 100% 78%)) drop-shadow(0 3px 10px hsl(38 100% 50% / 0.7))",
+};
+
 const TierStar = ({ tier, earned, size = 24 }: { tier: StarTier; earned: boolean; size?: number }) => {
   const c = STAR_COLORS[tier];
   return (
     <Star
       style={
         earned
-          ? { color: c.fill, fill: c.fill, filter: `drop-shadow(0 2px 6px ${c.fill})` }
+          ? { color: c.stroke, fill: c.fill, filter: TIER_FILTER[tier] }
           : { color: "hsl(var(--muted-foreground) / 0.35)" }
       }
       width={size}
       height={size}
-      strokeWidth={2}
+      strokeWidth={1.5}
     />
   );
 };
