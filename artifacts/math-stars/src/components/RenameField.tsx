@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Check, X } from "lucide-react";
+import { playClick } from "@/lib/audio";
 
 interface RenameFieldProps {
   value: string;
@@ -54,6 +55,8 @@ export const RenameField = ({
           } else if (e.key === "Escape") {
             e.preventDefault();
             finish(false);
+          } else if (e.key.length === 1 || e.key === "Backspace") {
+            playClick();
           }
         }}
         onBlur={() => {
@@ -74,7 +77,7 @@ export const RenameField = ({
       <button
         type="button"
         onMouseDown={(e) => e.preventDefault()}
-        onClick={() => finish(true)}
+        onClick={() => { playClick(); finish(true); }}
         className="size-8 rounded-lg bg-success text-success-foreground inline-flex items-center justify-center active:scale-95"
         aria-label="Save name"
       >
@@ -83,7 +86,7 @@ export const RenameField = ({
       <button
         type="button"
         onMouseDown={(e) => e.preventDefault()}
-        onClick={() => finish(false)}
+        onClick={() => { playClick(); finish(false); }}
         className="size-8 rounded-lg bg-muted inline-flex items-center justify-center active:scale-95"
         aria-label="Cancel"
       >

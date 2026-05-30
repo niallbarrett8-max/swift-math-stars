@@ -1,4 +1,5 @@
 import { Sparkles, Plus, Minus, X as XIcon, Divide, GraduationCap, Star } from "lucide-react";
+import { playClick } from "@/lib/audio";
 import {
   Difficulty,
   Operation,
@@ -82,8 +83,8 @@ export const SetupScreen = ({
 
       <div className="text-center mb-6">
         <button
-          onClick={onAdventure}
-          className="btn-3d btn-3d-accent btn-shimmer inline-flex items-center gap-2 px-5 py-3 text-base sm:text-lg mb-5 shadow-glow font-extrabold"
+            className="btn-3d btn-3d-accent btn-shimmer inline-flex items-center gap-2 px-5 py-3 text-base sm:text-lg mb-5 shadow-glow font-extrabold"
+          onClick={() => { playClick(); onAdventure(); }}
         >
           <Star
             className="size-5"
@@ -117,7 +118,7 @@ export const SetupScreen = ({
             return (
               <button
                 key={o.id}
-                onClick={() => onOperation(o.id)}
+                onClick={() => { playClick(); onOperation(o.id); }}
                 aria-pressed={active}
                 aria-label={OP_LABEL[o.id]}
                 className={`btn-3d ${o.gradient} flex-col py-3 sm:py-4 text-xs sm:text-sm ${
@@ -140,7 +141,7 @@ export const SetupScreen = ({
             return (
               <button
                 key={d.id}
-                onClick={() => onDifficulty(d.id)}
+                onClick={() => { playClick(); onDifficulty(d.id); }}
                 aria-pressed={active}
                 className={`btn-3d ${d.cls} flex-col py-3 sm:py-4 ${
                   active ? "btn-3d-active-ring" : "opacity-75"
@@ -162,7 +163,7 @@ export const SetupScreen = ({
             return (
               <button
                 key={String(t.value)}
-                onClick={() => onTimer(t.value)}
+                onClick={() => { playClick(); onTimer(t.value); }}
                 aria-pressed={active}
                 className={`btn-3d btn-3d-secondary py-3 sm:py-4 text-sm sm:text-base ${
                   active ? "btn-3d-active-ring" : "opacity-75"
@@ -183,7 +184,7 @@ export const SetupScreen = ({
             return (
               <button
                 key={String(t.value)}
-                onClick={() => onTarget(t.value)}
+                onClick={() => { playClick(); onTarget(t.value); }}
                 aria-pressed={active}
                 className={`btn-3d btn-3d-accent py-3 sm:py-4 text-sm sm:text-base ${
                   active ? "btn-3d-active-ring" : "opacity-75"
@@ -196,10 +197,10 @@ export const SetupScreen = ({
         </div>
       </section>
 
-      <button onClick={onStart} className="btn-3d w-full text-2xl py-5 mb-3">
+      <button onClick={() => { playClick(); onStart(); }} className="btn-3d w-full text-2xl py-5 mb-3">
         Start Game →
       </button>
-      <button onClick={onPracticeMode} className="btn-3d btn-3d-accent w-full text-base py-4">
+      <button onClick={() => { playClick(); onPracticeMode(); }} className="btn-3d btn-3d-accent w-full text-base py-4">
         <GraduationCap className="size-5" /> Practice
       </button>
     </div>

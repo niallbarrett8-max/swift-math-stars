@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ArrowLeft, Pencil, Users } from "lucide-react";
+import { playClick } from "@/lib/audio";
 import {
   ClassroomStudent,
   getClassroomStudents,
@@ -32,7 +33,7 @@ export const ClassroomScreen = ({ onBack, onPickStudent }: ClassroomScreenProps)
   return (
     <div className="w-full max-w-3xl gradient-card rounded-3xl shadow-card p-6 sm:p-8 animate-soft-fade">
       <div className="flex items-center justify-between mb-5">
-        <button onClick={onBack} className="btn-3d btn-3d-neutral px-4 py-2 text-sm">
+        <button onClick={() => { playClick(); onBack(); }} className="btn-3d btn-3d-neutral px-4 py-2 text-sm">
           <ArrowLeft className="size-4" /> Back
         </button>
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full gradient-secondary text-white font-extrabold text-xs shadow-soft">
@@ -64,7 +65,7 @@ export const ClassroomScreen = ({ onBack, onPickStudent }: ClassroomScreenProps)
           return (
             <div key={s.id} className="relative">
               <button
-                onClick={() => onPickStudent(s.id)}
+                onClick={() => { playClick(); onPickStudent(s.id); }}
                 className="btn-3d btn-3d-neutral w-full py-3 text-sm sm:text-base truncate"
               >
                 <span className="truncate max-w-full">{s.name}</span>
@@ -72,6 +73,7 @@ export const ClassroomScreen = ({ onBack, onPickStudent }: ClassroomScreenProps)
               <button
                 onClick={(e) => {
                   e.stopPropagation();
+                  playClick();
                   startEdit(s);
                 }}
                 className="absolute -top-1.5 -right-1.5 size-6 rounded-full bg-background border-2 border-border shadow-soft inline-flex items-center justify-center hover:border-primary"

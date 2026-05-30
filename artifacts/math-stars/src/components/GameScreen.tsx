@@ -19,7 +19,7 @@ import {
   generateAdventureQuestion,
   generateQuestion,
 } from "@/lib/game";
-import { haptic, playCorrect, playStar, playWrong } from "@/lib/audio";
+import { haptic, playClick, playCorrect, playStar, playWrong } from "@/lib/audio";
 
 export interface GameResult {
   score: number;
@@ -275,7 +275,7 @@ export const GameScreen = ({
           {isStar ? `${STAR_COLORS[starTier!].label} Challenge` : isHighScore ? "High Score Challenge" : isChallenge ? "Daily Math Challenge" : "Math Stars"}
         </h2>
         <button
-          onClick={onQuit}
+          onClick={() => { playClick(); onQuit(); }}
           className="btn-3d btn-3d-neutral px-4 py-2 text-sm"
           aria-label="Quit game"
         >

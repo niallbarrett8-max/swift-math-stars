@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { playClick } from "@/lib/audio";
 import { ArrowLeft, Plus, Minus, X as XIcon, Divide, GraduationCap, BookOpen } from "lucide-react";
 import { Operation, OP_LABEL, familyMax } from "@/lib/game";
 
@@ -60,7 +61,7 @@ export const PracticeSetupScreen = ({
   return (
     <div className="w-full max-w-2xl gradient-card rounded-3xl shadow-card p-6 sm:p-10 animate-soft-fade">
       <div className="flex items-center justify-between mb-6">
-        <button onClick={onBack} className="btn-3d btn-3d-neutral px-4 py-2 text-sm">
+        <button onClick={() => { playClick(); onBack(); }} className="btn-3d btn-3d-neutral px-4 py-2 text-sm">
           <ArrowLeft className="size-4" /> Back
         </button>
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full gradient-accent text-accent-foreground font-extrabold text-xs shadow-soft">
@@ -84,7 +85,7 @@ export const PracticeSetupScreen = ({
             return (
               <button
                 key={o.id}
-                onClick={() => setOperation(o.id)}
+                onClick={() => { playClick(); setOperation(o.id); }}
                 aria-pressed={active}
                 aria-label={OP_LABEL[o.id]}
                 className={`btn-3d ${o.cls} flex-col py-3 sm:py-4 text-xs sm:text-sm ${
@@ -110,7 +111,7 @@ export const PracticeSetupScreen = ({
             return (
               <button
                 key={n}
-                onClick={() => setFamily(n)}
+                onClick={() => { playClick(); setFamily(n); }}
                 aria-pressed={active}
                 className={`btn-3d ${active ? "btn-3d-active-ring" : "btn-3d-neutral opacity-90"} h-12 sm:h-14 text-xl sm:text-2xl`}
               >
@@ -126,12 +127,12 @@ export const PracticeSetupScreen = ({
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <button
-          onClick={() => onLearn(op, family)}
+          onClick={() => { playClick(); onLearn(op, family); }}
           className="btn-3d btn-3d-secondary w-full text-xl py-4"
         >
           <BookOpen className="size-5" /> Learn
         </button>
-        <button onClick={() => onStart(op, family)} className="btn-3d w-full text-xl py-4">
+        <button onClick={() => { playClick(); onStart(op, family); }} className="btn-3d w-full text-xl py-4">
           Start Practice →
         </button>
       </div>

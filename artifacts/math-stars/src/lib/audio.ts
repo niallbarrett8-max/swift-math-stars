@@ -514,7 +514,13 @@ const playTactile = (duration = 0.04, cutoff = 650, peak = 0.08) => {
   body.stop(now + duration * 1.2 + 0.02);
 };
 
-export const playKeypad = () => {
+/**
+ * Premium UI click — used for ALL buttons, keys, and text-input presses.
+ * Narrow high-frequency bandpass (1100–5500 Hz) filtered noise burst:
+ * very short (15 ms), light, crisp, no low-end body. Feels like a modern
+ * smartphone interaction rather than a game sound effect.
+ */
+export const playClick = () => {
   if (!settings.keypadOn) return;
   const c = getCtx();
   const buf = getNoise();
@@ -522,29 +528,30 @@ export const playKeypad = () => {
   const now = c.currentTime;
   const src = c.createBufferSource();
   src.buffer = buf;
-  const offset = Math.random() * Math.max(0, buf.duration - 0.03);
+  const offset = Math.random() * Math.max(0, buf.duration - 0.02);
 
-  // High-pass removes low-end thump; low-pass removes harsh treble.
-  // Together they produce a clean mid-range click — crisp, not drum-like.
   const hp = c.createBiquadFilter();
   hp.type = "highpass";
-  hp.frequency.value = 700;
-  hp.Q.value = 0.5;
+  hp.frequency.value = 1100;
+  hp.Q.value = 0.4;
 
   const lp = c.createBiquadFilter();
   lp.type = "lowpass";
-  lp.frequency.value = 4000;
-  lp.Q.value = 0.6;
+  lp.frequency.value = 5500;
+  lp.Q.value = 0.5;
 
   const g = c.createGain();
   g.gain.setValueAtTime(0, now);
-  g.gain.linearRampToValueAtTime(0.045, now + 0.001);
-  g.gain.exponentialRampToValueAtTime(0.0005, now + 0.022);
+  g.gain.linearRampToValueAtTime(0.030, now + 0.0005);
+  g.gain.exponentialRampToValueAtTime(0.0005, now + 0.015);
 
   src.connect(hp).connect(lp).connect(g).connect(c.destination);
   src.start(now, offset);
-  src.stop(now + 0.028);
+  src.stop(now + 0.018);
 };
+
+/** Alias kept for backward compatibility. */
+export const playKeypad = playClick;
 
 // ============================================================
 // Haptics

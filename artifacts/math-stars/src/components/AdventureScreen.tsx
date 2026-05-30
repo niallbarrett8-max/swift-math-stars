@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ArrowLeft, Sparkles, Star, Calendar as CalIcon, Trophy, Lock } from "lucide-react";
+import { playClick } from "@/lib/audio";
 import {
   ADVENTURE_DURATION,
   AdventureDifficulty,
@@ -101,7 +102,7 @@ export const AdventureScreen = ({
   return (
     <div className="w-full max-w-2xl gradient-card rounded-3xl shadow-card p-6 sm:p-8 animate-soft-fade">
       <div className="flex items-center justify-between mb-5">
-        <button onClick={onBack} className="btn-3d btn-3d-neutral px-4 py-2 text-sm">
+        <button onClick={() => { playClick(); onBack(); }} className="btn-3d btn-3d-neutral px-4 py-2 text-sm">
           <ArrowLeft className="size-4" /> Back
         </button>
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full gradient-accent text-accent-foreground font-extrabold text-xs shadow-soft">
@@ -127,6 +128,7 @@ export const AdventureScreen = ({
               <button
                 key={d.id}
                 onClick={() => {
+                  playClick();
                   onDifficultyChange(d.id);
                   force((n) => n + 1);
                 }}
@@ -155,7 +157,7 @@ export const AdventureScreen = ({
             return (
               <button
                 key={tier}
-                onClick={() => info.unlocked && onStartStar(difficulty, tier)}
+                onClick={() => { if (info.unlocked) { playClick(); onStartStar(difficulty, tier); } }}
                 disabled={!info.unlocked}
                 className={`btn-3d ${
                   info.unlocked ? "btn-3d-neutral" : ""
@@ -198,7 +200,7 @@ export const AdventureScreen = ({
           <Trophy className="size-5 text-accent" /> High Score Challenge
         </h2>
         <button
-          onClick={() => onStartHighScore(difficulty)}
+          onClick={() => { playClick(); onStartHighScore(difficulty); }}
           className="btn-3d btn-3d-accent w-full !justify-between p-4 text-left"
         >
           <div className="flex flex-col items-start">
@@ -219,7 +221,7 @@ export const AdventureScreen = ({
       </section>
 
       <button
-        onClick={onOpenCalendar}
+        onClick={() => { playClick(); onOpenCalendar(); }}
         className="btn-3d btn-3d-secondary w-full text-base py-3"
       >
         <CalIcon className="size-5" /> Open Calendar

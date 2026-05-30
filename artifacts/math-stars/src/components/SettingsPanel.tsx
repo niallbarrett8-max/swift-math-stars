@@ -107,8 +107,8 @@ export const SettingsPanel = () => {
 
           <Row
             icon={<Hash className="size-5" />}
-            label="Keypad Sounds"
-            hint="Tap sound while typing"
+            label="Button & Key Sounds"
+            hint="Click feedback on all buttons and keys"
           >
             <Switch
               checked={s.keypadOn}

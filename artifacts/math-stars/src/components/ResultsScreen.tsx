@@ -1,5 +1,6 @@
 import { ConfettiCelebration } from "./ConfettiCelebration";
 import { Trophy, RotateCcw, Home, Sparkles, Hash, Play, Star, Clock, ChevronRight } from "lucide-react";
+import { playClick } from "@/lib/audio";
 import {
   AdventureDifficulty,
   OP_LABEL,
@@ -184,30 +185,30 @@ export const ResultsScreen = ({
 
         <div className="flex flex-col gap-3">
           {targetReached && onContinue && (
-            <button onClick={onContinue} className="btn-3d btn-3d-success w-full text-lg py-4">
+            <button onClick={() => { playClick(); onContinue!(); }} className="btn-3d btn-3d-success w-full text-lg py-4">
               <Play className="size-5" /> Continue Playing
             </button>
           )}
           {starEarned && onNextTier && starTier && (
-            <button onClick={onNextTier} className="btn-3d btn-3d-success w-full text-lg py-4">
+            <button onClick={() => { playClick(); onNextTier!(); }} className="btn-3d btn-3d-success w-full text-lg py-4">
               <ChevronRight className="size-5" /> {NEXT_TIER_LABEL[starTier]}
             </button>
           )}
           <button
-            onClick={onPlayAgain}
+            onClick={() => { playClick(); onPlayAgain(); }}
             className={`btn-3d ${starEarned ? "btn-3d-neutral" : ""} w-full text-lg py-4`}
           >
             <RotateCcw className="size-5" /> {practice ? "Practice Again" : "Play Again"}
           </button>
           {practice && onChooseAnother && (
             <button
-              onClick={onChooseAnother}
+              onClick={() => { playClick(); onChooseAnother!(); }}
               className="btn-3d btn-3d-accent w-full text-lg py-4"
             >
               <Hash className="size-5" /> Choose Another Number
             </button>
           )}
-          <button onClick={onHome} className="btn-3d btn-3d-neutral w-full text-lg py-4">
+          <button onClick={() => { playClick(); onHome(); }} className="btn-3d btn-3d-neutral w-full text-lg py-4">
             <Home className="size-5" /> Main Menu
           </button>
         </div>

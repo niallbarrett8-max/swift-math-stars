@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { User, Users } from "lucide-react";
+import { playClick } from "@/lib/audio";
 import {
   getProfileName,
   setProfileName,
@@ -69,6 +70,7 @@ export const ProfileSelector = ({ activeId, onChange }: ProfileSelectorProps) =>
     if (pressTimer.current !== null) {
       // Short tap — cancel long press and select profile.
       cancelPress();
+      playClick();
       onChange(id);
     }
     // If pressTimer is null, long press already fired → do nothing here.
@@ -151,7 +153,7 @@ export const ProfileSelector = ({ activeId, onChange }: ProfileSelectorProps) =>
         />
       ) : (
         <button
-          onClick={() => onChange("classroom")}
+          onClick={() => { playClick(); onChange("classroom"); }}
           aria-pressed={activeBaseId === "classroom"}
           className={`btn-3d btn-3d-secondary ${
             activeBaseId === "classroom" ? "btn-3d-active-ring" : "opacity-80"
