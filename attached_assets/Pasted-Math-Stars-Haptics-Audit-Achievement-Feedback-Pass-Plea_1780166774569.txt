@@ -1,0 +1,136 @@
+Math Stars – Haptics Audit & Achievement Feedback Pass
+
+Please audit and improve the haptic feedback system throughout the app.
+
+Current issue:
+
+Haptics are enabled in Settings, but on iPhone there is little or no noticeable vibration feedback during normal use.
+
+Before making changes, inspect the current implementation and determine exactly how haptics are currently working.
+
+⸻
+
+PART 1 – HAPTICS AUDIT
+
+Please investigate and report:
+
+1. Which app events currently trigger haptics.
+2. Which haptic API or implementation is currently being used.
+3. Whether the current implementation supports:
+    * Browser mode
+    * PWA mode
+    * Native iOS app builds
+4. Any limitations that would prevent strong haptic feedback while testing through Replit preview on iPhone.
+5. Whether haptics will behave differently once exported as a native iOS app.
+
+⸻
+
+PART 2 – HAPTIC IMPROVEMENTS
+
+After completing the audit, improve the haptic experience using native mobile haptic patterns where possible.
+
+Desired behaviour:
+
+Button Presses:
+
+* Very light feedback.
+* Subtle and responsive.
+* Should not feel distracting.
+
+Number Entry:
+
+* Same very light feedback.
+
+Correct Answer:
+
+* Positive success-style haptic.
+* Noticeably different from a normal button press.
+
+Incorrect Answer:
+
+* Error-style haptic.
+* Slightly more noticeable than a normal button press.
+
+Bronze Star Earned:
+
+* Success haptic.
+
+Silver Star Earned:
+
+* Success haptic.
+
+Gold Star Earned:
+
+* Success haptic.
+
+Daily Challenge Completion:
+
+* Most rewarding success haptic in the app.
+
+Requirements:
+
+* Use native haptic patterns whenever possible.
+* Avoid long vibration bursts.
+* Avoid repetitive buzzing.
+* Focus on clean, modern mobile feedback.
+* Keep the experience premium and subtle.
+
+⸻
+
+PART 3 – ACHIEVEMENT SOUNDS
+
+Please add a reward sound family for achievement moments.
+
+Apply to:
+
+* Bronze Star Earned
+* Silver Star Earned
+* Gold Star Earned
+* Daily Challenge Completed
+* Major progression unlocks
+
+Desired sound characteristics:
+
+* Short
+* Positive
+* Clean
+* Modern
+* Rewarding
+* Under 1 second
+
+Avoid:
+
+* Arcade sounds
+* Casino sounds
+* Cartoon sounds
+* Loud celebrations
+* Overly dramatic effects
+
+The goal is to create a polished achievement feeling without becoming repetitive during long play sessions.
+
+⸻
+
+DO NOT CHANGE
+
+Do not modify:
+
+* Music system
+* Music volume controls
+* Button/key sound system
+* Button/key sound volume controls
+* Game rules
+* Scoring
+* Timers
+* Progression systems
+
+⸻
+
+COMPLETION REPORT
+
+When complete, provide:
+
+1. Haptic audit findings.
+2. Haptic changes made.
+3. Achievement sounds added.
+4. Any browser limitations discovered.
+5. Recommended testing steps on iPhone.

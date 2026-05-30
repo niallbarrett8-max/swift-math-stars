@@ -19,7 +19,7 @@ import {
   generateAdventureQuestion,
   generateQuestion,
 } from "@/lib/game";
-import { haptic, playClick, playCorrect, playStar, playWrong } from "@/lib/audio";
+import { haptic, playAchievement, playClick, playCorrect, playWrong } from "@/lib/audio";
 
 export interface GameResult {
   score: number;
@@ -146,6 +146,10 @@ export const GameScreen = ({
       setTimeLeft((t) => {
         if (t <= 1) {
           window.clearInterval(id);
+          if (isHighScore) {
+            playAchievement("daily");
+            haptic("daily");
+          }
           finish();
           return 0;
         }
@@ -207,10 +211,10 @@ export const GameScreen = ({
       setFeedback({ type: "correct", correctAnswer: correct });
       playCorrect();
       haptic("correct");
-      // Star reward sound when star tier is reached
+      // Achievement sound + haptic when star tier goal is reached
       if (isStar && stateRef.current.score + 1 >= STAR_GOALS[starTier!]) {
-        playStar();
-        haptic("star");
+        playAchievement(starTier!);
+        haptic(starTier!);
       }
       window.setTimeout(() => advance(true), ADVANCE_MS);
       return;

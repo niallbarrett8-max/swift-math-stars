@@ -562,9 +562,105 @@ export const playClick = () => {
 export const playKeypad = playClick;
 
 // ============================================================
+// Achievement sounds — tiered reward audio (Bronze → Daily)
+// ============================================================
+
+export type AchievementTier = "bronze" | "silver" | "gold" | "daily";
+
+/**
+ * Tiered achievement chime — each tier adds a note and opens the
+ * filter slightly. All use sfxVolume for independent volume control.
+ *
+ * bronze : 2-note warm ascent          ~0.45 s
+ * silver : 3-note warm ascent          ~0.55 s
+ * gold   : 4-note shimmering ascent    ~0.65 s
+ * daily  : 5-note triumphant ascent    ~0.75 s
+ */
+export const playAchievement = (tier: AchievementTier) => {
+  if (!sfxAllowed()) return;
+  const c = getCtx();
+  if (!c) return;
+  const now = c.currentTime;
+  const vol = Math.max(0, Math.min(1, settings.sfxVolume));
+
+  // [freq Hz, delay s, peak gain, decay s]
+  type Note = [number, number, number, number];
+  const seqs: Record<AchievementTier, Note[]> = {
+    bronze: [
+      [523.25, 0.00, 0.10 * vol, 0.40],
+      [659.25, 0.09, 0.09 * vol, 0.42],
+    ],
+    silver: [
+      [523.25, 0.00, 0.11 * vol, 0.42],
+      [659.25, 0.09, 0.11 * vol, 0.44],
+      [783.99, 0.18, 0.09 * vol, 0.46],
+    ],
+    gold: [
+      [523.25, 0.00, 0.11 * vol, 0.44],
+      [659.25, 0.09, 0.11 * vol, 0.46],
+      [783.99, 0.18, 0.10 * vol, 0.48],
+      [1046.5, 0.28, 0.09 * vol, 0.52],
+    ],
+    daily: [
+      [523.25, 0.00, 0.12 * vol, 0.46],
+      [659.25, 0.09, 0.12 * vol, 0.48],
+      [783.99, 0.18, 0.11 * vol, 0.50],
+      [1046.5, 0.28, 0.10 * vol, 0.54],
+      [1318.5, 0.40, 0.09 * vol, 0.56],
+    ],
+  };
+
+  const cutoffs: Record<AchievementTier, number> = {
+    bronze: 3000,
+    silver: 3500,
+    gold:   4200,
+    daily:  5200,
+  };
+
+  const filter = c.createBiquadFilter();
+  filter.type = "lowpass";
+  filter.frequency.value = cutoffs[tier];
+  filter.Q.value = 0.5;
+  filter.connect(c.destination);
+
+  seqs[tier].forEach(([freq, delay, peak, dur]) => {
+    const osc = c.createOscillator();
+    osc.type = "sine";
+    osc.frequency.value = freq;
+    const g = c.createGain();
+    const t = now + delay;
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(peak, t + 0.018);
+    g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    osc.connect(g).connect(filter);
+    osc.start(t);
+    osc.stop(t + dur + 0.06);
+  });
+};
+
+// ============================================================
 // Haptics
 // ============================================================
-type HapticKind = "key" | "tap" | "correct" | "wrong" | "star" | "button";
+
+/**
+ * Supported haptic kinds:
+ *   key / tap / button  — UI interaction (light)
+ *   correct             — positive feedback
+ *   wrong               — error double-pulse
+ *   star (legacy)       — same as bronze
+ *   bronze/silver/gold  — tiered achievement pulses (Android)
+ *   daily               — most rewarding triple-pulse
+ *
+ * NOTE: navigator.vibrate() is Android-only.
+ * iOS Safari and iOS Chrome do not implement this API at all —
+ * there is no vibration in browser, PWA, or Replit preview on iPhone.
+ * True iOS haptics require a Capacitor native build.
+ */
+type HapticKind =
+  | "key" | "tap" | "button"
+  | "correct" | "wrong"
+  | "star"
+  | "bronze" | "silver" | "gold" | "daily";
 
 export const haptic = (kind: HapticKind = "tap") => {
   if (!settings.hapticsOn) return;
@@ -572,12 +668,16 @@ export const haptic = (kind: HapticKind = "tap") => {
   const nav = navigator as Navigator & { vibrate?: (p: number | number[]) => boolean };
   if (typeof nav.vibrate !== "function") return;
   const map: Record<HapticKind, number | number[]> = {
-    key: 8,
-    tap: 10,
-    button: 14,
-    correct: 14,
-    wrong: [18, 6, 18],
-    star: [12, 40, 18],
+    key:    6,
+    tap:    8,
+    button: 10,
+    correct: 20,
+    wrong:  [20, 8, 20],
+    star:   [12, 45, 18],
+    bronze: [12, 45, 18],
+    silver: [15, 45, 22, 50, 15],
+    gold:   [18, 45, 26, 50, 18],
+    daily:  [20, 40, 30, 50, 30, 55, 20],
   };
   try {
     nav.vibrate(map[kind]);
