@@ -7,9 +7,11 @@ export type MusicTrack = "home" | "learn" | "challenge" | null;
 
 export interface AudioSettings {
   musicOn: boolean;
-  musicVolume: number; // 0..1
+  musicVolume: number;   // 0..1
   sfxOn: boolean;
+  sfxVolume: number;     // 0..1
   keypadOn: boolean;
+  keypadVolume: number;  // 0..1
   hapticsOn: boolean;
 }
 
@@ -19,7 +21,9 @@ const DEFAULTS: AudioSettings = {
   musicOn: true,
   musicVolume: 0.45,
   sfxOn: true,
+  sfxVolume: 0.7,
   keypadOn: false,
+  keypadVolume: 0.7,
   hapticsOn: true,
 };
 
@@ -387,7 +391,7 @@ export const playCorrect = () => {
   const now = c.currentTime;
 
   const out = c.createGain();
-  out.gain.value = 0.9;
+  out.gain.value = 0.9 * Math.max(0, Math.min(1, settings.sfxVolume));
   const filter = c.createBiquadFilter();
   filter.type = "lowpass";
   filter.frequency.value = 3200;
@@ -426,8 +430,9 @@ export const playWrong = () => {
   osc.frequency.setValueAtTime(200, now);
   osc.frequency.exponentialRampToValueAtTime(140, now + 0.22);
   const g = c.createGain();
+  const wrongPeak = 0.09 * Math.max(0, Math.min(1, settings.sfxVolume));
   g.gain.setValueAtTime(0, now);
-  g.gain.linearRampToValueAtTime(0.09, now + 0.02);
+  g.gain.linearRampToValueAtTime(wrongPeak, now + 0.02);
   g.gain.exponentialRampToValueAtTime(0.0005, now + 0.3);
   const filter = c.createBiquadFilter();
   filter.type = "lowpass";
@@ -440,7 +445,8 @@ export const playWrong = () => {
 /** Subtle UI tap */
 export const playMenu = () => {
   if (!sfxAllowed()) return;
-  playTactile(0.045, 800, 0.07);
+  const v = Math.max(0, Math.min(1, settings.sfxVolume));
+  playTactile(0.045, 800, 0.07 * v);
 };
 
 /** Star reward — gentle warm shimmer */
@@ -459,6 +465,7 @@ export const playStar = () => {
     [783.99, 0.16],
     [1046.5, 0.26],
   ];
+  const starPeak = 0.09 * Math.max(0, Math.min(1, settings.sfxVolume));
   seq.forEach(([f, d]) => {
     const osc = c.createOscillator();
     osc.type = "sine";
@@ -467,7 +474,7 @@ export const playStar = () => {
     const start = now + d;
     const dur = 0.55;
     g.gain.setValueAtTime(0, start);
-    g.gain.linearRampToValueAtTime(0.09, start + 0.02);
+    g.gain.linearRampToValueAtTime(starPeak, start + 0.02);
     g.gain.exponentialRampToValueAtTime(0.0008, start + dur);
     osc.connect(g).connect(filter);
     osc.start(start);
@@ -540,9 +547,10 @@ export const playClick = () => {
   lp.frequency.value = 5500;
   lp.Q.value = 0.5;
 
+  const clickPeak = 0.030 * Math.max(0, Math.min(1, settings.keypadVolume));
   const g = c.createGain();
   g.gain.setValueAtTime(0, now);
-  g.gain.linearRampToValueAtTime(0.030, now + 0.0005);
+  g.gain.linearRampToValueAtTime(clickPeak, now + 0.0005);
   g.gain.exponentialRampToValueAtTime(0.0005, now + 0.015);
 
   src.connect(hp).connect(lp).connect(g).connect(c.destination);

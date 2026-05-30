@@ -94,7 +94,7 @@ export const SettingsPanel = () => {
           <Row
             icon={<Volume2 className="size-5" />}
             label="Sound Effects"
-            hint="Correct, wrong, menu & rewards"
+            hint="Correct, wrong and reward sounds"
           >
             <Switch
               checked={s.sfxOn}
@@ -104,6 +104,24 @@ export const SettingsPanel = () => {
               }}
             />
           </Row>
+
+          {s.sfxOn && (
+            <div className="px-1 pt-1 pb-3 border-b border-border">
+              <div className="flex items-center justify-between text-xs font-bold text-muted-foreground mb-2">
+                <span>Sound effects volume</span>
+                <span>{Math.round(s.sfxVolume * 100)}%</span>
+              </div>
+              <Slider
+                value={[Math.round(s.sfxVolume * 100)]}
+                min={0}
+                max={100}
+                step={1}
+                onValueChange={(vals) =>
+                  updateAudioSettings({ sfxVolume: (vals[0] ?? 0) / 100 })
+                }
+              />
+            </div>
+          )}
 
           <Row
             icon={<Hash className="size-5" />}
@@ -118,6 +136,24 @@ export const SettingsPanel = () => {
               }}
             />
           </Row>
+
+          {s.keypadOn && (
+            <div className="px-1 pt-1 pb-3 border-b border-border">
+              <div className="flex items-center justify-between text-xs font-bold text-muted-foreground mb-2">
+                <span>Button & key volume</span>
+                <span>{Math.round(s.keypadVolume * 100)}%</span>
+              </div>
+              <Slider
+                value={[Math.round(s.keypadVolume * 100)]}
+                min={0}
+                max={100}
+                step={1}
+                onValueChange={(vals) =>
+                  updateAudioSettings({ keypadVolume: (vals[0] ?? 0) / 100 })
+                }
+              />
+            </div>
+          )}
 
           <Row
             icon={<Vibrate className="size-5" />}
