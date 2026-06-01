@@ -1,11 +1,12 @@
 import { ArrowLeft, Trophy, Calendar as CalIcon } from "lucide-react";
 import {
+  AdventureDifficulty,
   STAR_COLORS,
   STAR_ORDER,
   StarTier,
   hsAccKey,
   hsScoreKey,
-  starTimeKey,
+  starTimeDiffKey,
   todayKey,
 } from "@/lib/game";
 import { Star } from "lucide-react";
@@ -15,6 +16,14 @@ interface CalendarScreenProps {
   profileId: string;
   onBack: () => void;
 }
+
+const DIFFICULTY_ORDER: AdventureDifficulty[] = ["easy", "medium", "hard"];
+
+const DIFF_LABEL: Record<AdventureDifficulty, string> = {
+  easy: "Easy",
+  medium: "Med",
+  hard: "Hard",
+};
 
 const readNum = (key: string): number | null => {
   if (typeof window === "undefined") return null;
@@ -46,13 +55,13 @@ const TierStar = ({ tier, earned }: { tier: StarTier; earned: boolean }) => {
   const c = STAR_COLORS[tier];
   return (
     <Star
-      width={18}
-      height={18}
+      width={15}
+      height={15}
       strokeWidth={2}
       style={
         earned
           ? { color: c.fill, fill: c.fill }
-          : { color: "hsl(var(--muted-foreground) / 0.3)" }
+          : { color: "hsl(var(--muted-foreground) / 0.28)" }
       }
     />
   );
@@ -82,14 +91,19 @@ export const CalendarScreen = ({ profileId, onBack }: CalendarScreenProps) => {
 
       <div className="space-y-2.5">
         {days.map((d) => {
-          const stars = STAR_ORDER.map((t) => ({
-            tier: t,
-            time: readNum(pkey(profileId, starTimeKey(d, t))),
-          }));
           const hs = readNum(pkey(profileId, hsScoreKey(d)));
           const acc = readNum(pkey(profileId, hsAccKey(d)));
-          const anything = stars.some((s) => s.time !== null) || hs !== null;
           const isToday = d === todayKey();
+
+          const diffRows = DIFFICULTY_ORDER.map((diff) => ({
+            diff,
+            stars: STAR_ORDER.map((t) => ({
+              tier: t,
+              time: readNum(pkey(profileId, starTimeDiffKey(d, diff, t))),
+            })),
+          })).filter((row) => row.stars.some((s) => s.time !== null));
+
+          const anything = diffRows.length > 0 || hs !== null;
 
           return (
             <div
@@ -98,45 +112,55 @@ export const CalendarScreen = ({ profileId, onBack }: CalendarScreenProps) => {
                 isToday ? "border-primary" : "border-border"
               } p-3 sm:p-4`}
             >
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-1.5">
                 <span className="font-extrabold text-sm sm:text-base">
-                  {formatDay(d)} {isToday && <span className="text-primary">· Today</span>}
+                  {formatDay(d)}{" "}
+                  {isToday && <span className="text-primary">· Today</span>}
                 </span>
                 {!anything && (
                   <span className="text-xs text-muted-foreground font-bold">No play yet</span>
                 )}
               </div>
+
               {anything && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  <div className="flex items-center gap-2 flex-wrap text-xs sm:text-sm font-bold">
-                    {stars.map((s) => (
-                      <span
-                        key={s.tier}
-                        className="inline-flex items-center gap-1 rounded-lg px-2 py-1 bg-muted"
-                      >
-                        <TierStar tier={s.tier} earned={s.time !== null} />
-                        {s.time !== null ? (
-                          <span style={{ color: STAR_COLORS[s.tier].fill }}>{fmtTime(s.time)}</span>
-                        ) : (
-                          <span className="text-muted-foreground">—</span>
+                <div className="space-y-1">
+                  {diffRows.map(({ diff, stars }) => {
+                    const earned = [...stars].reverse().find((s) => s.time !== null);
+                    return (
+                      <div key={diff} className="flex items-center gap-2">
+                        <span className="w-9 text-[10px] font-extrabold text-muted-foreground shrink-0">
+                          {DIFF_LABEL[diff]}
+                        </span>
+                        <div className="flex items-center gap-0.5">
+                          {stars.map((s) => (
+                            <TierStar key={s.tier} tier={s.tier} earned={s.time !== null} />
+                          ))}
+                        </div>
+                        {earned && (
+                          <span
+                            className="text-[10px] font-bold ml-0.5"
+                            style={{ color: STAR_COLORS[earned.tier].fill }}
+                          >
+                            {fmtTime(earned.time!)}
+                          </span>
                         )}
+                      </div>
+                    );
+                  })}
+
+                  {hs !== null && (
+                    <div className="flex items-center gap-2 pt-0.5 mt-0.5 border-t border-border/50">
+                      <span className="w-9 text-[10px] font-extrabold text-muted-foreground shrink-0">
+                        Run
                       </span>
-                    ))}
-                  </div>
-                  <div className="flex items-center justify-end gap-2 text-xs sm:text-sm font-bold">
-                    {hs !== null ? (
-                      <>
-                        <span className="inline-flex items-center gap-1 rounded-lg px-2 py-1 bg-accent/20">
-                          <Trophy className="size-3.5 text-accent" /> {hs}
-                        </span>
-                        <span className="inline-flex items-center gap-1 rounded-lg px-2 py-1 bg-secondary/20">
-                          🎯 {acc ?? 0}%
-                        </span>
-                      </>
-                    ) : (
-                      <span className="text-muted-foreground">No high-score run</span>
-                    )}
-                  </div>
+                      <span className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 bg-accent/15 text-[10px] font-bold">
+                        <Trophy className="size-3 text-accent" /> {hs}
+                      </span>
+                      <span className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 bg-secondary/15 text-[10px] font-bold">
+                        🎯 {acc ?? 0}%
+                      </span>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

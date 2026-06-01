@@ -10,7 +10,7 @@ import {
   StarTier,
   hsAccKey,
   hsScoreKey,
-  starTimeKey,
+  starTimeDiffKey,
   tierUnlockedKey,
   todayKey,
 } from "@/lib/game";
@@ -34,14 +34,27 @@ const readNum = (key: string): number | null => {
   return Number.isFinite(n) ? n : null;
 };
 
-export const isTierUnlocked = (profileId: string, tier: StarTier, today: string): boolean => {
+// isTierUnlocked checks daily progression *per difficulty* — each difficulty
+// (easy / medium / hard) has its own independent Bronze → Silver → Gold chain.
+export const isTierUnlocked = (
+  profileId: string,
+  tier: StarTier,
+  today: string,
+  difficulty: AdventureDifficulty,
+): boolean => {
   if (tier === "bronze") return true;
   if (typeof window === "undefined") return false;
-  // Daily reset: Silver only unlocked if Bronze was completed TODAY
   if (tier === "silver")
-    return window.localStorage.getItem(pkey(profileId, starTimeKey(today, "bronze"))) !== null;
-  // Gold only unlocked if Silver was completed TODAY
-  return window.localStorage.getItem(pkey(profileId, starTimeKey(today, "silver"))) !== null;
+    return (
+      window.localStorage.getItem(
+        pkey(profileId, starTimeDiffKey(today, difficulty, "bronze")),
+      ) !== null
+    );
+  return (
+    window.localStorage.getItem(
+      pkey(profileId, starTimeDiffKey(today, difficulty, "silver")),
+    ) !== null
+  );
 };
 
 const TIER_FILTER: Record<StarTier, string> = {
@@ -93,8 +106,8 @@ export const AdventureScreen = ({
   const todayAcc = readNum(pkey(profileId, hsAccKey(today))) ?? 0;
 
   const starInfo = (tier: StarTier) => {
-    const time = readNum(pkey(profileId, starTimeKey(today, tier)));
-    const unlocked = isTierUnlocked(profileId, tier, today);
+    const time = readNum(pkey(profileId, starTimeDiffKey(today, difficulty, tier)));
+    const unlocked = isTierUnlocked(profileId, tier, today, difficulty);
     const earnedToday = time !== null;
     return { time, unlocked, earnedToday };
   };

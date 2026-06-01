@@ -1,0 +1,104 @@
+Math Stars – Daily Challenge Progression & End-of-Game Flow Improvements
+
+Please implement the following two improvements while preserving all existing gameplay functionality.
+
+⸻
+
+1. DAILY CHALLENGE PROGRESSION
+
+⸻
+
+Current issue:
+
+Daily Challenge stars appear to be shared across Easy, Medium, and Hard difficulties.
+
+Desired behaviour:
+
+Each difficulty should have its own independent daily progression.
+
+Easy:
+
+* Bronze
+* Silver
+* Gold
+
+Medium:
+
+* Bronze
+* Silver
+* Gold
+
+Hard:
+
+* Bronze
+* Silver
+* Gold
+
+This allows players to earn stars separately for each difficulty level.
+
+IMPORTANT:
+
+Please review the Daily Challenge calendar and progress displays.
+
+Do not simply add nine visible stars to each day if it creates clutter.
+
+Goal:
+
+* Keep the calendar clean and easy to read.
+* Preserve a polished appearance.
+* Design an intuitive way to show daily progress across all three difficulties.
+* If necessary, show summary progress in the calendar and detailed progress when a day is selected.
+
+Use your best judgement to create a clean, attractive solution.
+
+⸻
+
+2. END-OF-GAME RESULTS EXPERIENCE
+
+⸻
+
+Current issue:
+
+When the timer reaches zero, the results screen appears immediately.
+
+Because gameplay encourages rapid answering right until the final second, players may accidentally press:
+
+* Play Again
+* Main Menu
+
+before they have a chance to review their results.
+
+Desired behaviour:
+
+When time reaches zero:
+
+1. Brief “Time’s Up!” transition.
+2. Show the results screen.
+3. Animate key statistics counting upward to their final values:
+    * Total Correct
+    * Accuracy %
+    * Best Streak
+    * Any other key statistics shown
+4. After the animation completes, reveal:
+    * Play Again
+    * Main Menu
+
+Goals:
+
+* Prevent accidental taps.
+* Give players a moment to reflect on their performance.
+* Make results feel rewarding.
+* Improve the overall polish of the game experience.
+
+Keep the animation smooth and relatively quick (approximately 1–2 seconds total).
+
+⸻
+
+COMPLETION REPORT
+
+When complete, provide:
+
+1. How daily challenge progress is now displayed.
+2. Any visual changes made to the calendar.
+3. How the end-of-game animation works.
+4. Any recommended testing steps.

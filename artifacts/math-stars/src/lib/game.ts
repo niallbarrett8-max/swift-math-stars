@@ -180,7 +180,11 @@ export const todayKey = (d = new Date()) =>
 
 // ===== Star + High Score record keys (per profile via pkey wrapper) =====
 // Best (lowest) completion time in seconds for a star tier on a date.
+// Legacy key (difficulty-agnostic). Kept for backward-compat reads; new writes use starTimeDiffKey.
 export const starTimeKey = (date: string, tier: StarTier) => `adv.${date}.star.${tier}`;
+// Per-difficulty star completion time — includes the adventure difficulty level.
+export const starTimeDiffKey = (date: string, diff: AdventureDifficulty, tier: StarTier) =>
+  `adv.${date}.${diff}.star.${tier}`;
 // Best high-score (correct) and matching accuracy for a date.
 export const hsScoreKey = (date: string) => `adv.${date}.hs.score`;
 export const hsAccKey = (date: string) => `adv.${date}.hs.acc`;

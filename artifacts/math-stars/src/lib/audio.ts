@@ -568,13 +568,17 @@ export const playKeypad = playClick;
 export type AchievementTier = "bronze" | "silver" | "gold" | "daily";
 
 /**
- * Tiered achievement chime — each tier adds a note and opens the
- * filter slightly. All use sfxVolume for independent volume control.
+ * Achievement flourish — a musical "ta-da" moment rather than a note sequence.
  *
- * bronze : 2-note warm ascent          ~0.45 s
- * silver : 3-note warm ascent          ~0.55 s
- * gold   : 4-note shimmering ascent    ~0.65 s
- * daily  : 5-note triumphant ascent    ~0.75 s
+ * Structure: rapid ornamental grace notes rushing upward, landing on a
+ * sustained resonant note. Silver/Gold/Daily add a lower harmony voice on
+ * the landing for richness. All tones are sine waves; filter opens
+ * progressively for each tier (brighter = more celebratory).
+ *
+ * bronze : 2 grace → G5 landing               ~0.70 s
+ * silver : 3 grace → C6 landing + E6 harmony  ~0.82 s
+ * gold   : 4 grace → E6 landing + C6 harmony  ~0.98 s
+ * daily  : 5 grace → G6 landing + E6 harmony  ~1.10 s
  */
 export const playAchievement = (tier: AchievementTier) => {
   if (!sfxAllowed()) return;
@@ -583,59 +587,90 @@ export const playAchievement = (tier: AchievementTier) => {
   const now = c.currentTime;
   const vol = Math.max(0, Math.min(1, settings.sfxVolume));
 
-  // [freq Hz, delay s, peak gain, decay s]
-  type Note = [number, number, number, number];
-  const seqs: Record<AchievementTier, Note[]> = {
-    bronze: [
-      [523.25, 0.00, 0.10 * vol, 0.40],
-      [659.25, 0.09, 0.09 * vol, 0.42],
-    ],
-    silver: [
-      [523.25, 0.00, 0.11 * vol, 0.42],
-      [659.25, 0.09, 0.11 * vol, 0.44],
-      [783.99, 0.18, 0.09 * vol, 0.46],
-    ],
-    gold: [
-      [523.25, 0.00, 0.11 * vol, 0.44],
-      [659.25, 0.09, 0.11 * vol, 0.46],
-      [783.99, 0.18, 0.10 * vol, 0.48],
-      [1046.5, 0.28, 0.09 * vol, 0.52],
-    ],
-    daily: [
-      [523.25, 0.00, 0.12 * vol, 0.46],
-      [659.25, 0.09, 0.12 * vol, 0.48],
-      [783.99, 0.18, 0.11 * vol, 0.50],
-      [1046.5, 0.28, 0.10 * vol, 0.54],
-      [1318.5, 0.40, 0.09 * vol, 0.56],
-    ],
+  // Grace note params: very short (42 ms total, 9 ms attack),
+  // quieter than landing so they feel like ornaments not separate notes.
+  const GD = 0.042;  // grace duration
+  const GA = 0.009;  // grace attack
+  const GI = 0.052;  // interval between grace note starts (slight overlap)
+  const LA = 0.020;  // landing attack
+
+  // [freq Hz, startOffset s, peakGain, totalDur s]
+  type N = [number, number, number, number];
+
+  type Cfg = { grace: N[]; land: N; harmony?: N };
+
+  const cfgs: Record<AchievementTier, Cfg> = {
+    bronze: {
+      grace: [
+        [523.25, 0 * GI, 0.060 * vol, GD],  // C5
+        [659.25, 1 * GI, 0.068 * vol, GD],  // E5
+      ],
+      land:    [783.99, 2 * GI, 0.115 * vol, 0.60],  // G5
+    },
+    silver: {
+      grace: [
+        [523.25, 0 * GI, 0.055 * vol, GD],  // C5
+        [659.25, 1 * GI, 0.062 * vol, GD],  // E5
+        [783.99, 2 * GI, 0.068 * vol, GD],  // G5
+      ],
+      land:    [1046.5, 3 * GI, 0.115 * vol, 0.66],  // C6
+      harmony: [1318.5, 3 * GI + 0.045, 0.055 * vol, 0.56],  // E6 (enters late, softer)
+    },
+    gold: {
+      grace: [
+        [523.25, 0 * GI, 0.055 * vol, GD],  // C5
+        [659.25, 1 * GI, 0.060 * vol, GD],  // E5
+        [783.99, 2 * GI, 0.065 * vol, GD],  // G5
+        [1046.5, 3 * GI, 0.072 * vol, GD],  // C6
+      ],
+      land:    [1318.5, 4 * GI, 0.115 * vol, 0.76],  // E6
+      harmony: [1046.5, 4 * GI + 0.025, 0.060 * vol, 0.68],  // C6 below (richer chord)
+    },
+    daily: {
+      grace: [
+        [523.25, 0 * GI, 0.055 * vol, GD],  // C5
+        [659.25, 1 * GI, 0.060 * vol, GD],  // E5
+        [783.99, 2 * GI, 0.065 * vol, GD],  // G5
+        [1046.5, 3 * GI, 0.070 * vol, GD],  // C6
+        [1318.5, 4 * GI, 0.076 * vol, GD],  // E6
+      ],
+      land:    [1568.0, 5 * GI, 0.115 * vol, 0.86],  // G6 (highest, most triumphant)
+      harmony: [1318.5, 5 * GI + 0.030, 0.065 * vol, 0.76],  // E6 below
+    },
   };
 
   const cutoffs: Record<AchievementTier, number> = {
-    bronze: 3000,
-    silver: 3500,
-    gold:   4200,
-    daily:  5200,
+    bronze: 5000,
+    silver: 6500,
+    gold:   8000,
+    daily:  10000,
   };
 
   const filter = c.createBiquadFilter();
   filter.type = "lowpass";
   filter.frequency.value = cutoffs[tier];
-  filter.Q.value = 0.5;
+  filter.Q.value = 0.3;
   filter.connect(c.destination);
 
-  seqs[tier].forEach(([freq, delay, peak, dur]) => {
+  const playNote = ([freq, offset, peak, dur]: N, isGrace: boolean) => {
     const osc = c.createOscillator();
     osc.type = "sine";
     osc.frequency.value = freq;
     const g = c.createGain();
-    const t = now + delay;
+    const t = now + offset;
+    const attack = isGrace ? GA : LA;
     g.gain.setValueAtTime(0, t);
-    g.gain.linearRampToValueAtTime(peak, t + 0.018);
+    g.gain.linearRampToValueAtTime(peak, t + attack);
     g.gain.exponentialRampToValueAtTime(0.001, t + dur);
     osc.connect(g).connect(filter);
     osc.start(t);
-    osc.stop(t + dur + 0.06);
-  });
+    osc.stop(t + dur + 0.08);
+  };
+
+  const cfg = cfgs[tier];
+  cfg.grace.forEach((n) => playNote(n, true));
+  playNote(cfg.land, false);
+  if (cfg.harmony) playNote(cfg.harmony, false);
 };
 
 // ============================================================

@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { ConfettiCelebration } from "./ConfettiCelebration";
 import { Trophy, RotateCcw, Home, Sparkles, Hash, Play, Star, Clock, ChevronRight } from "lucide-react";
 import { playClick } from "@/lib/audio";
@@ -76,6 +77,42 @@ export const ResultsScreen = ({
     !!starEarned ||
     (highScoreChallenge && isNewHighScore);
 
+  // Animate stats counting up from 0, then reveal buttons after a short delay.
+  // Skip animation for practice sessions (no timer, no accidental-tap risk).
+  const shouldAnimate = !practice;
+
+  const [dispScore, setDispScore] = useState(shouldAnimate ? 0 : score);
+  const [dispAccuracy, setDispAccuracy] = useState(shouldAnimate ? 0 : accuracy);
+  const [dispStreak, setDispStreak] = useState(shouldAnimate ? 0 : bestStreak);
+  const [buttonsReady, setButtonsReady] = useState(!shouldAnimate);
+  const rafRef = useRef<number>(0);
+
+  useEffect(() => {
+    if (!shouldAnimate) return;
+    const ANIM_MS = 1100;
+    const BUTTON_DELAY_MS = 350;
+    const start = Date.now();
+
+    const tick = () => {
+      const elapsed = Date.now() - start;
+      const t = Math.min(1, elapsed / ANIM_MS);
+      const eased = 1 - Math.pow(1 - t, 3); // cubic ease-out
+
+      setDispScore(Math.round(score * eased));
+      setDispAccuracy(Math.round(accuracy * eased));
+      setDispStreak(Math.round(bestStreak * eased));
+
+      if (t < 1) {
+        rafRef.current = requestAnimationFrame(tick);
+      } else {
+        window.setTimeout(() => setButtonsReady(true), BUTTON_DELAY_MS);
+      }
+    };
+
+    rafRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, []); // intentionally run once on mount only
+
   return (
     <>
       {celebrate && <ConfettiCelebration />}
@@ -151,15 +188,15 @@ export const ResultsScreen = ({
 
         <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-4">
           <div className="rounded-2xl gradient-primary text-primary-foreground p-4 shadow-soft">
-            <div className="text-3xl sm:text-4xl font-extrabold">{score}</div>
+            <div className="text-3xl sm:text-4xl font-extrabold tabular-nums">{dispScore}</div>
             <div className="text-xs sm:text-sm font-bold opacity-90 mt-1">CORRECT</div>
           </div>
           <div className="rounded-2xl gradient-secondary text-white p-4 shadow-soft">
-            <div className="text-3xl sm:text-4xl font-extrabold">{accuracy}%</div>
+            <div className="text-3xl sm:text-4xl font-extrabold tabular-nums">{dispAccuracy}%</div>
             <div className="text-xs sm:text-sm font-bold opacity-90 mt-1">ACCURACY</div>
           </div>
           <div className="rounded-2xl gradient-accent text-white p-4 shadow-soft">
-            <div className="text-3xl sm:text-4xl font-extrabold">{bestStreak}</div>
+            <div className="text-3xl sm:text-4xl font-extrabold tabular-nums">{dispStreak}</div>
             <div className="text-xs sm:text-sm font-bold opacity-90 mt-1">BEST STREAK</div>
           </div>
         </div>
@@ -183,7 +220,12 @@ export const ResultsScreen = ({
           </div>
         )}
 
-        <div className="flex flex-col gap-3">
+        {/* Buttons fade in after the stats animation completes */}
+        <div
+          className={`flex flex-col gap-3 transition-opacity duration-500 ${
+            buttonsReady ? "opacity-100" : "opacity-0 pointer-events-none"
+          }`}
+        >
           {targetReached && onContinue && (
             <button onClick={() => { playClick(); onContinue!(); }} className="btn-3d btn-3d-success w-full text-lg py-4">
               <Play className="size-5" /> Continue Playing

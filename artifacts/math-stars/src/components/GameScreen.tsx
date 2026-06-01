@@ -211,10 +211,12 @@ export const GameScreen = ({
       setFeedback({ type: "correct", correctAnswer: correct });
       playCorrect();
       haptic("correct");
-      // Achievement sound + haptic when star tier goal is reached
+      // Haptic fires immediately (physical answer feedback).
+      // Sound is delayed 650 ms so the correct-answer chime fully completes
+      // before the achievement flourish begins — keeps them distinct.
       if (isStar && stateRef.current.score + 1 >= STAR_GOALS[starTier!]) {
-        playAchievement(starTier!);
         haptic(starTier!);
+        window.setTimeout(() => playAchievement(starTier!), 650);
       }
       window.setTimeout(() => advance(true), ADVANCE_MS);
       return;

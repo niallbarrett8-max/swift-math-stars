@@ -21,7 +21,7 @@ import {
   highScoreKey,
   hsAccKey,
   hsScoreKey,
-  starTimeKey,
+  starTimeDiffKey,
   tierUnlockedKey,
   todayKey,
 } from "@/lib/game";
@@ -223,8 +223,10 @@ const Index = () => {
     const today = todayKey();
     if (r.starTier) {
       if (r.starEarned && r.elapsedSeconds !== undefined) {
-        // Record best (lowest) time
-        const k = pkey(profileId, starTimeKey(today, r.starTier));
+        // Record best (lowest) time — scoped per difficulty so each
+        // difficulty has its own independent Bronze/Silver/Gold progression.
+        const diff = r.challenge ?? adventureDiff;
+        const k = pkey(profileId, starTimeDiffKey(today, diff, r.starTier));
         const prev = window.localStorage.getItem(k);
         const prevN = prev ? Number(prev) : Infinity;
         if (r.elapsedSeconds < prevN) {
