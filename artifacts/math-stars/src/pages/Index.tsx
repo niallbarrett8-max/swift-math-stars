@@ -73,6 +73,15 @@ const readTarget = (profileId: string): TargetScore => {
   return "endless";
 };
 
+// Maps a completed target to the next one in the sequence (10→25→50→75→100).
+// 100 has no entry — "Next Target" button is hidden at that level.
+const NEXT_TARGET: Partial<Record<TargetScore, TargetScore>> = {
+  10: 25,
+  25: 50,
+  50: 75,
+  75: 100,
+};
+
 const readAdvDiff = (profileId: string): AdventureDifficulty => {
   const v = readStr(pkey(profileId, STORAGE_KEYS.adventureDiff), "easy");
   if (v === "medium" || v === "hard") return v;
@@ -391,10 +400,12 @@ const Index = () => {
           highScoreChallenge={result.highScoreChallenge}
           elapsedSeconds={result.elapsedSeconds}
           onContinue={
-            result.targetReached
+            result.targetReached && NEXT_TARGET[result.targetScore as TargetScore]
               ? () => {
-                  setContinueScore(result.score);
-                  setTarget("endless");
+                  setTarget(NEXT_TARGET[result.targetScore as TargetScore]!);
+                  setContinueScore(0);
+                  setResult(null);
+                  setIsNewHigh(false);
                   setScreen("game");
                 }
               : undefined

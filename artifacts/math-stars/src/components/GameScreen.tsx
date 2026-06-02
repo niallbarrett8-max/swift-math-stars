@@ -105,6 +105,8 @@ export const GameScreen = ({
   const [wrong, setWrong] = useState(0);
   const [streak, setStreak] = useState(0);
   const [bestStreak, setBestStreak] = useState(0);
+  // Practice mode only: true while a wrong digit is being displayed (red flash)
+  const [practiceWrong, setPracticeWrong] = useState(false);
 
   const totalSeconds = isPractice || isEndlessTimer ? 0 : (timer as number);
   const [timeLeft, setTimeLeft] = useState<number>(totalSeconds);
@@ -191,6 +193,7 @@ export const GameScreen = ({
     }
     setValue("");
     setFeedback(null);
+    setPracticeWrong(false);
     setQuestionKey((k) => k + 1);
     lockedRef.current = false;
   };
@@ -200,6 +203,7 @@ export const GameScreen = ({
     const correctStr = String(correct);
     const n = Number(next);
 
+    // === Full correct answer (all modes) ===
     if (next.length > 0 && !Number.isNaN(n) && n === correct) {
       lockedRef.current = true;
       setScore((s) => s + 1);
@@ -218,10 +222,34 @@ export const GameScreen = ({
         haptic(starTier!);
         window.setTimeout(() => playAchievement(starTier!), 650);
       }
-      window.setTimeout(() => advance(true), ADVANCE_MS);
+      // Practice mode: hold on "Correct!" longer so students can see it
+      window.setTimeout(() => advance(true), isPractice ? 600 : ADVANCE_MS);
       return;
     }
 
+    // === Practice mode: per-digit prefix feedback ===
+    // Each digit is checked against the correct answer prefix. A correct
+    // prefix digit stays green; an incorrect digit flashes red for 500 ms
+    // then is automatically removed — the confirmed prefix remains.
+    if (isPractice) {
+      const isValidPrefix = correctStr.startsWith(next);
+      if (!isValidPrefix) {
+        lockedRef.current = true;
+        setPracticeWrong(true);
+        setWrong((w) => w + 1);
+        playWrong();
+        haptic("wrong");
+        window.setTimeout(() => {
+          setValue((v) => v.slice(0, -1)); // remove wrong digit, restore prefix
+          setPracticeWrong(false);
+          lockedRef.current = false;
+        }, 500);
+      }
+      // If it IS a valid prefix, do nothing — digit stays and shows in green
+      return;
+    }
+
+    // === Standard mode: wrong when input length reaches answer length ===
     if (next.length >= correctStr.length) {
       lockedRef.current = true;
       setWrong((w) => w + 1);
@@ -275,7 +303,7 @@ export const GameScreen = ({
   const tierColor = isStar ? STAR_COLORS[starTier!].fill : undefined;
 
   return (
-    <div className="w-full max-w-2xl space-y-4 animate-soft-fade">
+    <div className="w-full max-w-2xl space-y-4 animate-soft-fade select-none">
       <div className="flex items-center justify-between gap-3">
         <h2 className="text-xl sm:text-3xl font-extrabold text-gradient">
           {isStar ? `${STAR_COLORS[starTier!].label} Challenge` : isHighScore ? "High Score Challenge" : isChallenge ? "Daily Math Challenge" : "Math Stars"}
@@ -371,6 +399,8 @@ export const GameScreen = ({
         value={value}
         feedback={feedback}
         questionKey={questionKey}
+        isPractice={isPractice}
+        practiceWrong={practiceWrong}
       />
 
       <Keypad onDigit={handleDigit} onDelete={handleDelete} onClear={handleClear} />

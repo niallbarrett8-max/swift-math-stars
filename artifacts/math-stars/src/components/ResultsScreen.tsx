@@ -58,6 +58,7 @@ export const ResultsScreen = ({
   operation,
   family,
   targetReached,
+  targetScore,
   challenge,
   starTier,
   starEarned,
@@ -70,6 +71,12 @@ export const ResultsScreen = ({
   onHome,
 }: ResultsScreenProps) => {
   const tierColor = starTier ? STAR_COLORS[starTier].fill : undefined;
+
+  // Compute the next target score for the "Next Target" button label.
+  const nextTargetNum = (
+    { 10: 25, 25: 50, 50: 75, 75: 100 } as Record<number, number>
+  )[targetScore as number];
+
   const celebrate =
     isNewHighScore ||
     targetReached ||
@@ -226,9 +233,9 @@ export const ResultsScreen = ({
             buttonsReady ? "opacity-100" : "opacity-0 pointer-events-none"
           }`}
         >
-          {targetReached && onContinue && (
+          {targetReached && onContinue && nextTargetNum && (
             <button onClick={() => { playClick(); onContinue!(); }} className="btn-3d btn-3d-success w-full text-lg py-4">
-              <Play className="size-5" /> Continue Playing
+              <Play className="size-5" /> Next Target: {nextTargetNum}
             </button>
           )}
           {starEarned && onNextTier && starTier && (
