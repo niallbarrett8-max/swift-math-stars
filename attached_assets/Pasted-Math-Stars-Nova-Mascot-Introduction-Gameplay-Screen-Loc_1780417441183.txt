@@ -1,0 +1,146 @@
+Math Stars – Nova Mascot Introduction & Gameplay Screen Lock
+
+Please implement the following carefully while preserving the current Math Stars design and functionality.
+
+IMPORTANT
+
+This is intended to be an enhancement, not a redesign.
+
+Preserve:
+
+* Existing layout
+* Existing colors
+* Existing gameplay
+* Existing menus
+* Existing progression systems
+
+The goal is to add personality while keeping the app clean and polished.
+
+⸻
+
+PART 1 – NOVA MASCOT
+
+Introduce a friendly Math Stars mascot named:
+
+⭐ Nova
+
+Nova should become the face of the app.
+
+Design goals:
+
+* Friendly
+* Modern
+* Cute
+* Encouraging
+* Educational
+* Not distracting
+
+IMPORTANT:
+
+Do not redesign the entire UI around Nova.
+
+Nova should complement the existing interface.
+
+⸻
+
+MAIN MENU
+
+Add Nova near the top area of the Main Menu.
+
+Nova may be larger on this screen than elsewhere.
+
+Nova can provide contextual speech bubbles such as:
+
+* Pick an operation!
+* Great choice!
+* Ready to earn some stars?
+* Try today’s Daily Challenge!
+
+Speech bubbles should appear naturally and not clutter the interface.
+
+⸻
+
+RESULTS SCREEN
+
+Nova should be most visible here.
+
+Examples:
+
+* Amazing!
+* New best streak!
+* Great job!
+* Ready for another round?
+
+Nova may use a celebratory expression.
+
+⸻
+
+PRACTICE MODE
+
+Use Nova sparingly.
+
+Examples:
+
+* Nice work!
+* Keep trying!
+* You got it!
+
+Do not interrupt gameplay.
+
+⸻
+
+CLASSROOM MODE
+
+Use minimal Nova interaction.
+
+The Classroom experience should remain focused and clean.
+
+⸻
+
+EXPRESSIONS
+
+If practical, support simple expression changes:
+
+* Happy
+* Celebrating
+* Thinking
+* Neutral
+
+Simple image swaps are preferred over complex animation.
+
+⸻
+
+PART 2 – GAMEPLAY SCREEN LOCK
+
+Gameplay screens should not scroll.
+
+Disable vertical page movement for:
+
+* Standard gameplay
+* Practice gameplay
+* Daily Challenge gameplay
+* Classroom gameplay
+* Results screens
+
+Players should not be able to accidentally move the screen while rapidly entering answers.
+
+Menu and settings screens may remain scrollable where appropriate.
+
+⸻
+
+PART 3 – SAFE IMPLEMENTATION
+
+Implement Nova in a way that is easy to disable or remove later if desired.
+
+Do not create deep dependencies between Nova and core gameplay systems.
+
+⸻
+
+COMPLETION REPORT
+
+Provide:
+
+1. Where Nova appears.
+2. Which speech bubbles were added.
+3. Which screens are now locked from scrolling.
+4. Any recommendations for future mascot improvements.

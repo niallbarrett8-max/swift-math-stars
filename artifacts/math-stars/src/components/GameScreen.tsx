@@ -142,6 +142,14 @@ export const GameScreen = ({
   };
 
   // Countdown
+  // Lock body scroll for the entire gameplay session so rapid tapping
+  // doesn't accidentally pan the page on iOS/Android.
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prev; };
+  }, []);
+
   useEffect(() => {
     if (isPractice || isEndlessTimer) return;
     const id = window.setInterval(() => {

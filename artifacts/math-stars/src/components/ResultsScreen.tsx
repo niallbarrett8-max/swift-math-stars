@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ConfettiCelebration } from "./ConfettiCelebration";
+import { NovaMascot } from "./NovaMascot";
 import { Trophy, RotateCcw, Home, Sparkles, Hash, Play, Star, Clock, ChevronRight } from "lucide-react";
 import { playClick } from "@/lib/audio";
 import {
@@ -120,6 +121,35 @@ export const ResultsScreen = ({
     return () => cancelAnimationFrame(rafRef.current);
   }, []); // intentionally run once on mount only
 
+  // Lock body scroll so players can't accidentally pan the page on results.
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prev; };
+  }, []);
+
+  // Nova mascot expression and message derived from result data.
+  const novaExpression =
+    isNewHighScore || starEarned || (practice && accuracy >= 90)
+      ? "celebrating" as const
+      : celebrate
+        ? "happy" as const
+        : "neutral" as const;
+
+  const novaResultMessage = starEarned
+    ? "You're a star! ⭐"
+    : isNewHighScore
+      ? "New personal best!"
+      : targetReached
+        ? "You reached it!"
+        : practice && accuracy >= 90
+          ? "Amazing accuracy!"
+          : practice
+            ? "Good practice!"
+            : score >= 20
+              ? "Great score!"
+              : "Keep it up!";
+
   return (
     <>
       {celebrate && <ConfettiCelebration />}
@@ -157,6 +187,16 @@ export const ResultsScreen = ({
             Time's Up!
           </div>
         )}
+
+        {/* Nova mascot — most prominent on results screen */}
+        <div className="flex justify-center my-2">
+          <NovaMascot
+            expression={novaExpression}
+            message={novaResultMessage}
+            size="lg"
+            bubbleSide="right"
+          />
+        </div>
 
         <div className="mb-6">
           {starTier ? (
