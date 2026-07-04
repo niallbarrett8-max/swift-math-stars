@@ -12,7 +12,6 @@ import {
 import { ProfileSelector } from "./ProfileSelector";
 import { SettingsPanel } from "./SettingsPanel";
 import { getProfileName } from "@/lib/profiles";
-import { NovaMascot } from "./NovaMascot";
 
 interface SetupScreenProps {
   operation: Operation;
@@ -48,13 +47,6 @@ const difficulties: { id: Difficulty; label: string; cls: string }[] = [
 
 const possessive = (name: string) => `${name}${name.endsWith("s") ? "'" : "'s"}`;
 
-const NOVA_MESSAGES: Record<Operation, string> = {
-  add:  "Let's add it up!",
-  sub:  "Subtraction time!",
-  mul:  "Times tables! Let's go!",
-  div:  "Division is fun!",
-};
-
 export const SetupScreen = ({
   operation,
   difficulty,
@@ -89,48 +81,32 @@ export const SetupScreen = ({
       </div>
       <ProfileSelector activeId={activeProfileId} onChange={onProfileChange} />
 
-      <div className="mb-6">
-        {/* Daily Challenge button — centred at top, full visual weight */}
-        <div className="text-center mb-4">
-          <button
-            className="btn-3d btn-3d-accent btn-shimmer inline-flex items-center gap-2 px-5 py-3 text-base sm:text-lg shadow-glow font-extrabold"
-            onClick={() => { playClick(); onAdventure(); }}
-          >
-            <Star
-              className="size-5"
-              style={{ fill: "hsl(48 100% 88%)", color: "hsl(38 90% 55%)" }}
-              strokeWidth={2}
-            />
-            Daily Math Challenge
-            <Sparkles className="size-4" style={{ color: "hsl(48 100% 90%)" }} />
-          </button>
-        </div>
-
-        {/* Title row: text left-centre, Nova right */}
-        <div className="flex items-center gap-2 sm:gap-4">
-          <div className="flex-1 min-w-0 text-center">
-            <h1 className="text-3xl sm:text-5xl font-extrabold text-gradient mb-2 leading-tight">
-              {title}
-            </h1>
-            <p className="text-sm sm:text-base text-muted-foreground font-semibold">
-              Practice {OP_LABEL[operation].toLowerCase()} and beat your high score!
-            </p>
-            {highScore > 0 && (
-              <p className="mt-2 text-sm font-bold text-accent-foreground/80">
-                🏆 Personal Best ({OP_LABEL[operation]} · {difficulty} ·{" "}
-                {timer === "endless" ? "Endless" : `${timer}s`}):{" "}
-                <span className="text-foreground">{highScore}</span>
-              </p>
-            )}
-          </div>
-          {/* Nova mascot — remove the NovaMascot usages to disable mascot */}
-          <NovaMascot
-            expression="happy"
-            message={NOVA_MESSAGES[operation]}
-            size="md"
-            bubbleSide="left"
+      <div className="text-center mb-6">
+        <button
+            className="btn-3d btn-3d-accent btn-shimmer inline-flex items-center gap-2 px-5 py-3 text-base sm:text-lg mb-5 shadow-glow font-extrabold"
+          onClick={() => { playClick(); onAdventure(); }}
+        >
+          <Star
+            className="size-5"
+            style={{ fill: "hsl(48 100% 88%)", color: "hsl(38 90% 55%)" }}
+            strokeWidth={2}
           />
-        </div>
+          Daily Math Challenge
+          <Sparkles className="size-4" style={{ color: "hsl(48 100% 90%)" }} />
+        </button>
+        <h1 className="text-3xl sm:text-5xl font-extrabold text-gradient mb-2 leading-tight">
+          {title}
+        </h1>
+        <p className="text-sm sm:text-base text-muted-foreground font-semibold max-w-md mx-auto">
+          Practice {OP_LABEL[operation].toLowerCase()} and beat your high score!
+        </p>
+        {highScore > 0 && (
+          <p className="mt-3 text-sm font-bold text-accent-foreground/80">
+            🏆 Personal Best ({OP_LABEL[operation]} · {difficulty} ·{" "}
+            {timer === "endless" ? "Endless" : `${timer}s`}):{" "}
+            <span className="text-foreground">{highScore}</span>
+          </p>
+        )}
       </div>
 
       <section className="mb-6">
