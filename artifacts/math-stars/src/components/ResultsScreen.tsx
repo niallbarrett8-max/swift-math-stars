@@ -161,16 +161,30 @@ export const ResultsScreen = ({
         <div className="mb-6">
           {starTier ? (
             <div className="flex items-center justify-center mb-2">
-              <Star
-                className="size-24"
-                strokeWidth={1.5}
-                style={{
-                  color: starEarned ? STAR_COLORS[starTier].stroke : "hsl(var(--muted-foreground) / 0.4)",
-                  fill: starEarned ? tierColor : "transparent",
-                  filter: starEarned ? `drop-shadow(0 4px 20px ${tierColor})` : undefined,
-                }}
-              />
+              {starEarned ? (
+                <img
+                  src={`/images/billy-p/daily-award-${starTier}.png`}
+                  alt={`Billy P holding the ${starTier} Daily Math Challenge award`}
+                  className="h-24 w-24 object-contain"
+                />
+              ) : (
+                <Star
+                  className="size-24"
+                  strokeWidth={1.5}
+                  style={{
+                    color: starEarned ? STAR_COLORS[starTier].stroke : "hsl(var(--muted-foreground) / 0.4)",
+                    fill: starEarned ? tierColor : "transparent",
+                    filter: starEarned ? `drop-shadow(0 4px 20px ${tierColor})` : undefined,
+                  }}
+                />
+              )}
             </div>
+          ) : highScoreChallenge ? (
+            <img
+              src="/images/billy-p/normal-challenge-completion-3.png"
+              alt="Billy P holding a pencil beside math cards"
+              className="mx-auto mb-2 h-28 w-28 object-contain"
+            />
           ) : (
             <Trophy
               className={`size-20 sm:size-24 mx-auto mb-2 ${
