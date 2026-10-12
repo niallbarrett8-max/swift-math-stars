@@ -107,6 +107,11 @@ export const SetupScreen = ({
             <span className="text-foreground">{highScore}</span>
           </p>
         )}
+        <img
+          src="/images/billy-p/home-screen.png"
+          alt="Billy P, the Math Stars penguin mascot, holding a pencil and math cards"
+          className="mx-auto mt-3 block h-[104px] w-[104px] object-contain"
+        />
       </div>
 
       <section className="mb-6">
