@@ -47,6 +47,25 @@ const NEXT_TIER_LABEL: Record<StarTier, string> = {
   gold: "Play 60-Second Run",
 };
 
+const REGULAR_GAME_BILLY_IMAGES = [
+  {
+    src: "/images/billy-p/regular-completion-a-plus-sheet.png",
+    alt: "Billy P celebrating with an A+ math sheet",
+  },
+  {
+    src: "/images/billy-p/regular-completion-pencil.png",
+    alt: "Billy P holding a pencil and math cards",
+  },
+  {
+    src: "/images/billy-p/regular-completion-abacus.png",
+    alt: "Billy P holding an abacus",
+  },
+  {
+    src: "/images/billy-p/regular-completion-jump.png",
+    alt: "Billy P jumping with his wings raised",
+  },
+] as const;
+
 export const ResultsScreen = ({
   score,
   total,
@@ -71,6 +90,14 @@ export const ResultsScreen = ({
   onHome,
 }: ResultsScreenProps) => {
   const tierColor = starTier ? STAR_COLORS[starTier].fill : undefined;
+  const isRegularGame = !practice && !challenge && !highScoreChallenge && !starTier;
+  const [regularGameBilly] = useState(() =>
+    isRegularGame
+      ? REGULAR_GAME_BILLY_IMAGES[
+          Math.floor(Math.random() * REGULAR_GAME_BILLY_IMAGES.length)
+        ]
+      : undefined,
+  );
 
   // Compute the next target score for the "Next Target" button label.
   const nextTargetNum = (
@@ -183,6 +210,12 @@ export const ResultsScreen = ({
             <img
               src="/images/billy-p/normal-challenge-completion-3.png"
               alt="Billy P holding a pencil beside math cards"
+              className="mx-auto mb-2 h-28 w-28 object-contain"
+            />
+          ) : regularGameBilly ? (
+            <img
+              src={regularGameBilly.src}
+              alt={regularGameBilly.alt}
               className="mx-auto mb-2 h-28 w-28 object-contain"
             />
           ) : (
