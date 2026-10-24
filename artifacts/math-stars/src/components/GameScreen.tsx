@@ -307,8 +307,8 @@ export const GameScreen = ({
   const tierColor = isStar ? STAR_COLORS[starTier!].fill : undefined;
 
   return (
-    <div className="w-full max-w-2xl space-y-4 animate-soft-fade select-none">
-      <div className="flex items-center justify-between gap-3">
+    <div className="game-screen-layout w-full max-w-2xl animate-soft-fade select-none">
+      <div className="game-screen-header flex items-center justify-between gap-3">
         <h2 className="text-xl sm:text-3xl font-extrabold text-gradient">
           {isStar ? `${STAR_COLORS[starTier!].label} Challenge` : isHighScore ? "High Score Challenge" : isChallenge ? "Daily Math Challenge" : "Math Stars"}
         </h2>
@@ -322,7 +322,7 @@ export const GameScreen = ({
       </div>
 
       {isPractice ? (
-        <div className="w-full gradient-card rounded-2xl p-3 sm:p-4 shadow-soft space-y-2">
+        <div className="game-status-card w-full gradient-card rounded-2xl p-3 sm:p-4 shadow-soft space-y-2">
           <div className="flex items-center justify-between text-sm sm:text-base font-bold">
             <span>
               Family <span className="text-gradient">{practiceFamily}</span> ·{" "}
@@ -346,7 +346,7 @@ export const GameScreen = ({
           </div>
         </div>
       ) : isEndlessTimer ? (
-        <div className="w-full gradient-card rounded-2xl p-3 sm:p-4 shadow-soft">
+        <div className="game-status-card w-full gradient-card rounded-2xl p-3 sm:p-4 shadow-soft">
           <div className="flex items-center justify-between gap-2 flex-wrap text-sm sm:text-base font-extrabold">
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full gradient-accent text-accent-foreground shadow-soft">
               <InfinityIcon className="size-4" /> Endless
@@ -365,14 +365,14 @@ export const GameScreen = ({
           </div>
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="game-status-block">
           <StatsBar
             score={score}
             accuracy={calcAccuracy(score, score + wrong)}
             timeLeft={timeLeft}
             totalTime={totalSeconds}
           />
-          <div className="flex items-center justify-between text-xs sm:text-sm font-bold text-muted-foreground px-1 gap-2 flex-wrap">
+          <div className="game-substatus-row flex items-center justify-between text-xs sm:text-sm font-bold text-muted-foreground px-1 gap-2 flex-wrap">
             <span className="inline-flex items-center gap-1">
               <Flame className="size-4 text-accent" /> Streak {streak}{" "}
               <span className="opacity-70">· Best {bestStreak}</span>

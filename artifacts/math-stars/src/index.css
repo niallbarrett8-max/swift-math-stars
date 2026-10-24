@@ -187,3 +187,80 @@ body [role="textbox"] {
   user-select: text;
   -webkit-touch-callout: default;
 }
+
+/* Active games use the stable small viewport so Safari's expanding controls
+   don't resize the play area mid-round. Non-game screens keep their own scroll. */
+.game-viewport-shell {
+  box-sizing: border-box;
+  height: 100vh;
+  height: 100svh;
+  min-height: 0;
+  padding-block: max(0.5rem, env(safe-area-inset-top))
+    max(0.5rem, env(safe-area-inset-bottom));
+  padding-inline: max(0.75rem, env(safe-area-inset-left))
+    max(0.75rem, env(safe-area-inset-right));
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.game-screen-layout {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: 0.5rem;
+  gap: clamp(0.35rem, 1.1svh, 0.65rem);
+  min-height: 100%;
+}
+
+.game-screen-header,
+.game-status-card,
+.game-status-block,
+.game-keypad {
+  flex: 0 0 auto;
+}
+
+.game-status-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.game-stats-bar {
+  gap: clamp(0.25rem, 0.8svh, 0.5rem);
+}
+
+.game-question-card {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  padding-block: clamp(0.5rem, 1.5svh, 1.25rem);
+  padding-inline: clamp(0.75rem, 3vw, 2rem);
+}
+
+.game-question-feedback {
+  margin-top: 0.5rem;
+  margin-top: clamp(0.35rem, 0.8svh, 1rem);
+}
+
+.game-keypad {
+  gap: 0.375rem;
+  gap: clamp(0.25rem, 0.8svh, 0.5rem);
+}
+
+.game-key {
+  height: clamp(3rem, 7svh, 3.5rem);
+  min-height: 3rem;
+}
+
+@media (min-width: 640px) {
+  .game-keypad {
+    gap: 0.75rem;
+  }
+
+  .game-key {
+    height: 4rem;
+  }
+}

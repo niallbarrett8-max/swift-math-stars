@@ -39,7 +39,7 @@ const Key = ({
       }}
       disabled={disabled}
       aria-label={ariaLabel}
-      className={`${cls} h-14 sm:h-16 text-2xl sm:text-3xl select-none ${extraClass}`}
+      className={`game-key ${cls} h-14 sm:h-16 text-2xl sm:text-3xl select-none ${extraClass}`}
     >
       {children}
     </button>
@@ -49,7 +49,7 @@ const Key = ({
 export const Keypad = ({ onDigit, onDelete, onClear, disabled }: KeypadProps) => {
   const digits = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
   return (
-    <div className="w-full max-w-md mx-auto grid grid-cols-3 gap-2 sm:gap-3">
+    <div className="game-keypad w-full max-w-md mx-auto grid grid-cols-3 gap-2 sm:gap-3">
       {digits.map((d) => (
         <Key key={d} onClick={() => onDigit(d)} ariaLabel={`Digit ${d}`} disabled={disabled}>
           {d}

@@ -37,7 +37,7 @@ export const QuestionCard = ({
 
   return (
     <div
-      className="gradient-card rounded-3xl shadow-card p-5 sm:p-8 w-full select-none"
+      className="game-question-card gradient-card rounded-3xl shadow-card p-5 sm:p-8 w-full select-none"
       onContextMenu={(e) => e.preventDefault()}
     >
       <div className="text-center">
@@ -97,7 +97,7 @@ export const QuestionCard = ({
           )}
         </div>
 
-        <div className="mt-4 h-8 flex items-center justify-center" aria-live="polite">
+        <div className="game-question-feedback mt-4 h-8 flex items-center justify-center" aria-live="polite">
           {correct && (
             <span className="inline-flex items-center gap-2 px-3 py-1 rounded-xl gradient-success text-white font-extrabold text-sm sm:text-base shadow-soft animate-soft-fade">
               <Check className="size-5" strokeWidth={3} /> Correct!

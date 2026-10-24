@@ -298,8 +298,18 @@ const Index = () => {
     setScreen("results");
   };
 
+  const isGameplayScreen =
+    screen === "game" ||
+    screen === "practice" ||
+    screen === "starChallenge" ||
+    screen === "hsChallenge";
+
   return (
-    <main className="min-h-screen w-full flex items-center justify-center p-4 sm:p-6 safe-pad">
+    <main
+      className={`min-h-screen w-full flex items-center justify-center p-4 sm:p-6 safe-pad ${
+        isGameplayScreen ? "game-viewport-shell" : ""
+      }`}
+    >
       {screen === "setup" && (
         <SetupScreen
           operation={operation}

@@ -18,7 +18,7 @@ const Stat = ({
   value: string;
   gradient: string;
 }) => (
-  <div className="flex-1 gradient-card rounded-2xl p-3 sm:p-4 shadow-soft flex items-center gap-3">
+  <div className="flex-1 gradient-card rounded-2xl p-2 sm:p-4 shadow-soft flex items-center gap-2 sm:gap-3">
     <div className={`${gradient} rounded-xl p-2 sm:p-2.5 shadow-soft`}>
       <Icon className="size-5 sm:size-6 text-white" strokeWidth={2.5} />
     </div>
@@ -34,7 +34,7 @@ export const StatsBar = ({ score, accuracy, timeLeft, totalTime }: StatsBarProps
   const lowTime = timeLeft <= 10;
 
   return (
-    <div className="w-full space-y-3">
+    <div className="game-stats-bar w-full flex flex-col gap-1.5 sm:gap-2">
       <div className="grid grid-cols-3 gap-2 sm:gap-3">
         <Stat icon={Trophy} label="Score" value={String(score)} gradient="gradient-accent" />
         <Stat icon={Target} label="Accuracy" value={`${accuracy}%`} gradient="gradient-secondary" />
