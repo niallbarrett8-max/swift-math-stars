@@ -167,3 +167,23 @@
     color: transparent;
   }
 }
+
+/* Keep long presses from selecting game UI text or opening browser callouts. */
+body,
+body * {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Text-entry controls keep native selection, cursor placement, and edit callouts. */
+body input,
+body textarea,
+body select,
+body [contenteditable="true"],
+body [contenteditable=""],
+body [role="textbox"] {
+  -webkit-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
+}
