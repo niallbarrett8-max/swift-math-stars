@@ -43,6 +43,8 @@ interface GameScreenProps {
   operation: Operation;
   difficulty: Difficulty;
   timer: TimerOption | "practice";
+  gameLengthEnabled?: boolean;
+  targetEnabled?: boolean;
   practiceFamily?: number;
   targetScore?: TargetScore;
   challenge?: AdventureDifficulty;
@@ -69,6 +71,8 @@ export const GameScreen = ({
   operation,
   difficulty,
   timer,
+  gameLengthEnabled = true,
+  targetEnabled = true,
   practiceFamily,
   targetScore,
   challenge,
@@ -82,8 +86,8 @@ export const GameScreen = ({
   const isChallenge = !!challenge;
   const isStar = !!starTier;
   const isHighScore = !!isHighScoreChallenge;
-  const isEndlessTimer = timer === "endless";
-  const isEndlessTarget = !targetScore || targetScore === "endless";
+  const isEndlessTimer = !gameLengthEnabled || timer === "endless";
+  const isEndlessTarget = !targetEnabled || !targetScore || targetScore === "endless";
 
   const practiceSet = useRef<Question[]>(
     isPractice && practiceFamily ? buildPracticeFamily(operation, practiceFamily) : [],
@@ -349,6 +353,11 @@ export const GameScreen = ({
             </span>
             <span>Score: <span className="text-gradient">{score}</span></span>
             <span>Accuracy: <span className="text-gradient">{calcAccuracy(score, score + wrong)}%</span></span>
+            {!isEndlessTarget && typeof targetScore === "number" && (
+              <span>
+                Target: <span className="text-gradient">{score} / {targetScore}</span>
+              </span>
+            )}
             <span className="inline-flex items-center gap-1">
               <Flame className="size-4 text-accent" /> {streak}
             </span>

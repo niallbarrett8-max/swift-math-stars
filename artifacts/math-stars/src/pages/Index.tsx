@@ -57,6 +57,9 @@ const readStr = (key: string, fallback: string) => {
   return window.localStorage.getItem(key) ?? fallback;
 };
 
+const readBool = (key: string, fallback: boolean) =>
+  readStr(key, String(fallback)) !== "false";
+
 const readTimer = (profileId: string): TimerOption => {
   const v = readStr(pkey(profileId, STORAGE_KEYS.timer), "60");
   if (v === "endless") return "endless";
@@ -99,7 +102,14 @@ const Index = () => {
     () => readStr(pkey(profileId, STORAGE_KEYS.difficulty), "easy") as Difficulty,
   );
   const [timer, setTimer] = useState<TimerOption>(() => readTimer(profileId));
+  const [timerEnabled, setTimerEnabled] = useState<boolean>(() =>
+    readBool(pkey(profileId, STORAGE_KEYS.timerEnabled), true),
+  );
   const [target, setTarget] = useState<TargetScore>(() => readTarget(profileId));
+  const [targetEnabled, setTargetEnabled] = useState<boolean>(() =>
+    readBool(pkey(profileId, STORAGE_KEYS.targetEnabled), true),
+  );
+  const [settingsProfileId, setSettingsProfileId] = useState(profileId);
   const [soundOn, setSoundOn] = useState<boolean>(
     () => readStr(pkey(profileId, STORAGE_KEYS.sound), "true") !== "false",
   );
@@ -127,11 +137,14 @@ const Index = () => {
     setOperation(readStr(pkey(profileId, STORAGE_KEYS.operation), "mul") as Operation);
     setDifficulty(readStr(pkey(profileId, STORAGE_KEYS.difficulty), "easy") as Difficulty);
     setTimer(readTimer(profileId));
+    setTimerEnabled(readBool(pkey(profileId, STORAGE_KEYS.timerEnabled), true));
     setTarget(readTarget(profileId));
+    setTargetEnabled(readBool(pkey(profileId, STORAGE_KEYS.targetEnabled), true));
     setSoundOn(readStr(pkey(profileId, STORAGE_KEYS.sound), "true") !== "false");
     setPracticeOp(readStr(pkey(profileId, STORAGE_KEYS.practiceOp), "mul") as Operation);
     setPracticeFamily(readNum(pkey(profileId, STORAGE_KEYS.practiceFamily), 2));
     setAdventureDiff(readAdvDiff(profileId));
+    setSettingsProfileId(profileId);
   }, [profileId]);
 
   useEffect(() => {
@@ -144,8 +157,22 @@ const Index = () => {
     localStorage.setItem(pkey(profileId, STORAGE_KEYS.timer), String(timer));
   }, [profileId, timer]);
   useEffect(() => {
+    if (settingsProfileId !== profileId) return;
+    localStorage.setItem(
+      pkey(profileId, STORAGE_KEYS.timerEnabled),
+      String(timerEnabled),
+    );
+  }, [profileId, settingsProfileId, timerEnabled]);
+  useEffect(() => {
     localStorage.setItem(pkey(profileId, STORAGE_KEYS.target), String(target));
   }, [profileId, target]);
+  useEffect(() => {
+    if (settingsProfileId !== profileId) return;
+    localStorage.setItem(
+      pkey(profileId, STORAGE_KEYS.targetEnabled),
+      String(targetEnabled),
+    );
+  }, [profileId, settingsProfileId, targetEnabled]);
   useEffect(() => {
     localStorage.setItem(pkey(profileId, STORAGE_KEYS.sound), String(soundOn));
   }, [profileId, soundOn]);
@@ -278,7 +305,9 @@ const Index = () => {
           operation={operation}
           difficulty={difficulty}
           timer={timer}
+          timerEnabled={timerEnabled}
           target={target}
+          targetEnabled={targetEnabled}
           soundOn={soundOn}
           highScore={highScore}
           activeProfileId={profileId}
@@ -286,7 +315,9 @@ const Index = () => {
           onOperation={setOperation}
           onDifficulty={setDifficulty}
           onTimer={setTimer}
+          onTimerEnabledChange={setTimerEnabled}
           onTarget={setTarget}
+          onTargetEnabledChange={setTargetEnabled}
           onToggleSound={() => setSoundOn((s) => !s)}
           onStart={startGame}
           onPracticeMode={() => setScreen("practiceSetup")}
@@ -339,6 +370,8 @@ const Index = () => {
           difficulty={difficulty}
           timer={timer}
           targetScore={target}
+          gameLengthEnabled={timerEnabled}
+          targetEnabled={targetEnabled}
           soundOn={soundOn}
           onEnd={handleEnd}
           onQuit={() => setScreen("setup")}

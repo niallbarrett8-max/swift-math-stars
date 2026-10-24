@@ -12,12 +12,15 @@ import {
 import { ProfileSelector } from "./ProfileSelector";
 import { SettingsPanel } from "./SettingsPanel";
 import { getProfileName } from "@/lib/profiles";
+import { Switch } from "@/components/ui/switch";
 
 interface SetupScreenProps {
   operation: Operation;
   difficulty: Difficulty;
   timer: TimerOption;
+  timerEnabled: boolean;
   target: TargetScore;
+  targetEnabled: boolean;
   soundOn: boolean;
   highScore: number;
   activeProfileId: string;
@@ -25,7 +28,9 @@ interface SetupScreenProps {
   onOperation: (o: Operation) => void;
   onDifficulty: (d: Difficulty) => void;
   onTimer: (t: TimerOption) => void;
+  onTimerEnabledChange: (enabled: boolean) => void;
   onTarget: (t: TargetScore) => void;
+  onTargetEnabledChange: (enabled: boolean) => void;
   onToggleSound: () => void;
   onStart: () => void;
   onPracticeMode: () => void;
@@ -51,7 +56,9 @@ export const SetupScreen = ({
   operation,
   difficulty,
   timer,
+  timerEnabled,
   target,
+  targetEnabled,
   soundOn,
   highScore,
   activeProfileId,
@@ -59,7 +66,9 @@ export const SetupScreen = ({
   onOperation,
   onDifficulty,
   onTimer,
+  onTimerEnabledChange,
   onTarget,
+  onTargetEnabledChange,
   onToggleSound,
   onStart,
   onPracticeMode,
@@ -161,7 +170,15 @@ export const SetupScreen = ({
       </section>
 
       <section className="mb-6">
-        <h2 className="text-lg font-extrabold mb-3">Choose game length</h2>
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <h2 className="text-lg font-extrabold">Choose game length</h2>
+          <Switch
+            checked={timerEnabled}
+            onCheckedChange={onTimerEnabledChange}
+            aria-label="Game length on/off"
+            data-testid="switch-game-length"
+          />
+        </div>
         <div className="grid grid-cols-3 gap-2 sm:gap-3">
           {TIMER_OPTIONS.map((t) => {
             const active = timer === t.value;
@@ -170,7 +187,8 @@ export const SetupScreen = ({
                 key={String(t.value)}
                 onClick={() => { playClick(); onTimer(t.value); }}
                 aria-pressed={active}
-                className={`btn-3d btn-3d-secondary py-3 sm:py-4 text-sm sm:text-base ${
+                disabled={!timerEnabled}
+                className={`btn-3d btn-3d-secondary py-3 sm:py-4 text-sm sm:text-base disabled:cursor-not-allowed disabled:opacity-40 ${
                   active ? "btn-3d-active-ring" : "opacity-75"
                 }`}
               >
@@ -182,7 +200,15 @@ export const SetupScreen = ({
       </section>
 
       <section className="mb-6">
-        <h2 className="text-lg font-extrabold mb-3">Choose target score</h2>
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <h2 className="text-lg font-extrabold">Choose target score</h2>
+          <Switch
+            checked={targetEnabled}
+            onCheckedChange={onTargetEnabledChange}
+            aria-label="Target score on/off"
+            data-testid="switch-target-score"
+          />
+        </div>
         <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-3">
           {TARGET_OPTIONS.map((t) => {
             const active = target === t.value;
@@ -191,7 +217,8 @@ export const SetupScreen = ({
                 key={String(t.value)}
                 onClick={() => { playClick(); onTarget(t.value); }}
                 aria-pressed={active}
-                className={`btn-3d btn-3d-accent py-3 sm:py-4 text-sm sm:text-base ${
+                disabled={!targetEnabled}
+                className={`btn-3d btn-3d-accent py-3 sm:py-4 text-sm sm:text-base disabled:cursor-not-allowed disabled:opacity-40 ${
                   active ? "btn-3d-active-ring" : "opacity-75"
                 }`}
               >
