@@ -212,6 +212,12 @@ export const ResultsScreen = ({
               alt="Billy P holding a pencil beside math cards"
               className="mx-auto mb-2 h-28 w-28 object-contain"
             />
+          ) : practice ? (
+            <img
+              src="/images/billy-p/practice-mode-completion.png"
+              alt="Billy P teaching with a pointer"
+              className="mx-auto mb-2 h-28 w-28 object-contain"
+            />
           ) : regularGameBilly ? (
             <img
               src={regularGameBilly.src}
