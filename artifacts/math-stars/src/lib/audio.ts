@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 // ============================================================
 // Settings store (persisted)
 // ============================================================
-export type MusicTrack = "home" | "learn" | "challenge" | null;
+export type MusicTrack = "carefree" | null;
 
 export interface AudioSettings {
   musicOn: boolean;
@@ -19,7 +19,7 @@ const STORAGE_KEY = "mathstars.audio.v2";
 
 const DEFAULTS: AudioSettings = {
   musicOn: true,
-  musicVolume: 0.45,
+  musicVolume: 0.05,
   sfxOn: true,
   sfxVolume: 0.7,
   keypadOn: false,
@@ -52,7 +52,7 @@ export const getAudioSettings = (): AudioSettings => settings;
 export const updateAudioSettings = (patch: Partial<AudioSettings>) => {
   settings = { ...settings, ...patch };
   save();
-  ambient.refresh();
+  backgroundMusic.refresh();
   listeners.forEach((l) => l());
 };
 
@@ -84,17 +84,6 @@ const getCtx = (): AudioContext | null => {
   return ctx;
 };
 
-// Unlock on first gesture (mobile Safari)
-if (typeof window !== "undefined") {
-  const unlock = () => {
-    getCtx();
-    window.removeEventListener("touchend", unlock);
-    window.removeEventListener("pointerdown", unlock);
-  };
-  window.addEventListener("touchend", unlock, { passive: true });
-  window.addEventListener("pointerdown", unlock);
-}
-
 // Shared noise buffer (for tactile clicks)
 let noiseBuf: AudioBuffer | null = null;
 const getNoise = (): AudioBuffer | null => {
@@ -109,265 +98,110 @@ const getNoise = (): AudioBuffer | null => {
 };
 
 // ============================================================
-// Ambient atmosphere engine — non-melodic, layered pads
+// Shared looping background music
 // ============================================================
-interface AmbientCfg {
-  /** Sustained drone pad notes (frequencies). Layered. */
-  pad: number[];
-  /** Filter cutoff for the pad bus */
-  cutoff: number;
-  /** Range of seconds between sparse atmospheric notes */
-  sparkleEvery: [number, number];
-  /** Frequency pool for sparse atmospheric notes */
-  sparklePool: number[];
-  /** Per-sparkle peak gain */
-  sparklePeak: number;
-  /** Sparkle attack (s) */
-  sparkleAttack: number;
-  /** Sparkle release (s) */
-  sparkleRelease: number;
-  wave: OscillatorType;
-}
+class BackgroundMusic {
+  private player: HTMLAudioElement | null = null;
+  private currentTrack: MusicTrack = null;
+  private pausedForGameplay = false;
+  private hidden = false;
 
-// Warm low frequencies; we deliberately avoid bright melodic ranges
-const ATMOS: Record<Exclude<MusicTrack, null>, AmbientCfg> = {
-  // Home: warm, welcoming, cozy
-  home: {
-    pad: [110, 164.81, 220], // A2, E3, A3
-    cutoff: 900,
-    sparkleEvery: [4.5, 9],
-    sparklePool: [261.63, 329.63, 392.0, 440.0, 523.25], // C4..C5 pentatonic
-    sparklePeak: 0.05,
-    sparkleAttack: 0.8,
-    sparkleRelease: 3.5,
-    wave: "triangle",
-  },
-  // Learn/Practice: calm, focused, study
-  learn: {
-    pad: [98, 146.83, 196], // G2, D3, G3
-    cutoff: 700,
-    sparkleEvery: [7, 14],
-    sparklePool: [196.0, 261.63, 293.66, 392.0],
-    sparklePeak: 0.035,
-    sparkleAttack: 1.5,
-    sparkleRelease: 5,
-    wave: "sine",
-  },
-  // Daily challenge menu: lightly motivational anticipation
-  challenge: {
-    pad: [130.81, 196, 261.63], // C3, G3, C4
-    cutoff: 1100,
-    sparkleEvery: [3, 6],
-    sparklePool: [392.0, 440.0, 523.25, 587.33, 659.25, 783.99],
-    sparklePeak: 0.06,
-    sparkleAttack: 0.4,
-    sparkleRelease: 2.4,
-    wave: "triangle",
-  },
-};
-
-class AmbientEngine {
-  master: GainNode | null = null;
-  filter: BiquadFilterNode | null = null;
-  padOscs: { osc: OscillatorNode; gain: GainNode; lfo: OscillatorNode; lfoGain: GainNode }[] = [];
-  sparkleTimer: number | null = null;
-  current: MusicTrack = null;
-  pausedByVisibility = false;
-
-  private ensureChain() {
-    const c = getCtx();
-    if (!c) return null;
-    if (!this.master) {
-      this.filter = c.createBiquadFilter();
-      this.filter.type = "lowpass";
-      this.filter.frequency.value = 900;
-      this.filter.Q.value = 0.4;
-      this.master = c.createGain();
-      this.master.gain.value = 0;
-      this.filter.connect(this.master).connect(c.destination);
+  private getPlayer() {
+    if (typeof window === "undefined") return null;
+    if (!this.player) {
+      this.player = new Audio();
+      this.player.src = `${import.meta.env.BASE_URL}carefree.mp3`;
+      this.player.loop = true;
+      this.player.preload = "auto";
+      this.player.volume = this.musicVolume();
+      this.player.addEventListener("error", () => {
+        console.error("Failed to load Math Stars background music.", this.player?.error);
+      });
     }
-    return c;
+    return this.player;
   }
 
-  private targetVolume() {
-    if (!settings.musicOn) return 0;
-    return Math.max(0, Math.min(1, settings.musicVolume)) * 0.28;
+  private musicVolume() {
+    return Math.max(0, Math.min(1, settings.musicVolume));
   }
 
-  private rampVolume(to: number, time = 0.6) {
-    const c = getCtx();
-    if (!c || !this.master) return;
-    const now = c.currentTime;
-    this.master.gain.cancelScheduledValues(now);
-    this.master.gain.setValueAtTime(this.master.gain.value, now);
-    this.master.gain.linearRampToValueAtTime(to, now + time);
-  }
+  private sync() {
+    if (this.player) this.player.volume = this.musicVolume();
 
-  private clearPads() {
-    const c = getCtx();
-    if (!c) return;
-    const now = c.currentTime;
-    this.padOscs.forEach(({ osc, gain, lfo }) => {
-      try {
-        gain.gain.cancelScheduledValues(now);
-        gain.gain.setValueAtTime(gain.gain.value, now);
-        gain.gain.linearRampToValueAtTime(0, now + 0.6);
-        osc.stop(now + 0.7);
-        lfo.stop(now + 0.7);
-      } catch {}
-    });
-    this.padOscs = [];
-  }
+    if (
+      !settings.musicOn ||
+      !this.currentTrack ||
+      this.pausedForGameplay ||
+      this.hidden
+    ) {
+      this.player?.pause();
+      return;
+    }
 
-  private buildPads(cfg: AmbientCfg) {
-    const c = getCtx();
-    if (!c || !this.filter) return;
-    this.filter.frequency.cancelScheduledValues(c.currentTime);
-    this.filter.frequency.linearRampToValueAtTime(cfg.cutoff, c.currentTime + 1.5);
-    cfg.pad.forEach((freq, i) => {
-      const osc = c.createOscillator();
-      osc.type = "sine";
-      osc.frequency.value = freq;
-      const gain = c.createGain();
-      gain.gain.value = 0;
-      // slow gentle LFO for subtle movement
-      const lfo = c.createOscillator();
-      lfo.type = "sine";
-      lfo.frequency.value = 0.06 + i * 0.025;
-      const lfoGain = c.createGain();
-      lfoGain.gain.value = freq * 0.0035; // tiny pitch wobble
-      lfo.connect(lfoGain).connect(osc.frequency);
-      osc.connect(gain).connect(this.filter!);
-      const now = c.currentTime;
-      const peak = 0.11 / cfg.pad.length + 0.04;
-      gain.gain.setValueAtTime(0, now);
-      gain.gain.linearRampToValueAtTime(peak, now + 2.5 + i * 0.4);
-      osc.start(now);
-      lfo.start(now);
-      this.padOscs.push({ osc, gain, lfo, lfoGain });
+    const player = this.getPlayer();
+    if (!player || !player.paused) return;
+
+    player.play().catch((error: unknown) => {
+      if (
+        error instanceof DOMException &&
+        (error.name === "NotAllowedError" || error.name === "AbortError")
+      ) {
+        // Browsers can reject playback until a user gesture; retry on the next one.
+        return;
+      }
+      console.error("Failed to play Math Stars background music.", error);
     });
   }
 
-  private scheduleSparkle = () => {
-    if (!this.current) return;
-    const cfg = ATMOS[this.current];
-    const [lo, hi] = cfg.sparkleEvery;
-    const wait = (lo + Math.random() * (hi - lo)) * 1000;
-    this.sparkleTimer = window.setTimeout(() => {
-      this.playSparkle(cfg);
-      this.scheduleSparkle();
-    }, wait);
-  };
-
-  private playSparkle(cfg: AmbientCfg) {
-    const c = getCtx();
-    if (!c || !this.filter) return;
-    const freq = cfg.sparklePool[Math.floor(Math.random() * cfg.sparklePool.length)];
-    const osc = c.createOscillator();
-    osc.type = cfg.wave;
-    osc.frequency.value = freq;
-    const g = c.createGain();
-    const now = c.currentTime;
-    const total = cfg.sparkleAttack + cfg.sparkleRelease;
-    g.gain.setValueAtTime(0, now);
-    g.gain.linearRampToValueAtTime(cfg.sparklePeak, now + cfg.sparkleAttack);
-    g.gain.exponentialRampToValueAtTime(0.0005, now + total);
-    osc.connect(g).connect(this.filter);
-    osc.start(now);
-    osc.stop(now + total + 0.1);
-  }
-
-  play(track: MusicTrack) {
-    if (track === this.current && this.padOscs.length) {
-      this.rampVolume(this.targetVolume(), 0.4);
+  setTrack(track: MusicTrack) {
+    if (track === null) {
+      this.pausedForGameplay = true;
+      this.player?.pause();
       return;
     }
-    this.stopInternal(0.5);
-    if (!track || !settings.musicOn) {
-      this.current = track;
-      return;
-    }
-    const c = this.ensureChain();
-    if (!c) return;
-    this.current = track;
-    this.buildPads(ATMOS[track]);
-    this.rampVolume(this.targetVolume(), 1.2);
-    if (this.sparkleTimer) clearTimeout(this.sparkleTimer);
-    this.scheduleSparkle();
-  }
 
-  private stopInternal(fade = 0.4) {
-    if (this.sparkleTimer) {
-      clearTimeout(this.sparkleTimer);
-      this.sparkleTimer = null;
-    }
-    this.rampVolume(0, fade);
-    setTimeout(() => this.clearPads(), fade * 1000 + 50);
-  }
-
-  stop(fade = 0.4) {
-    this.stopInternal(fade);
-    this.current = null;
+    this.currentTrack = track;
+    this.pausedForGameplay = false;
+    this.sync();
   }
 
   refresh() {
-    if (!settings.musicOn) {
-      // pause but remember current
-      if (this.sparkleTimer) {
-        clearTimeout(this.sparkleTimer);
-        this.sparkleTimer = null;
-      }
-      this.rampVolume(0, 0.4);
-      setTimeout(() => this.clearPads(), 500);
-      return;
-    }
-    if (this.current && !this.padOscs.length) {
-      // resume
-      const desired = this.current;
-      this.current = null;
-      this.play(desired);
-      return;
-    }
-    this.rampVolume(this.targetVolume(), 0.3);
+    this.sync();
   }
 
-  // ----- Visibility / focus handling -----
+  stop() {
+    this.currentTrack = null;
+    this.pausedForGameplay = true;
+    this.player?.pause();
+  }
+
   handleVisibilityChange(hidden: boolean) {
-    if (hidden) {
-      if (this.padOscs.length) {
-        this.pausedByVisibility = true;
-        if (this.sparkleTimer) {
-          clearTimeout(this.sparkleTimer);
-          this.sparkleTimer = null;
-        }
-        this.rampVolume(0, 0.2);
-        setTimeout(() => this.clearPads(), 250);
-      }
-    } else if (this.pausedByVisibility) {
-      this.pausedByVisibility = false;
-      if (this.current && settings.musicOn) {
-        const desired = this.current;
-        this.current = null;
-        this.play(desired);
-      }
-    }
+    this.hidden = hidden;
+    this.sync();
   }
 }
 
-const ambient = new AmbientEngine();
+const backgroundMusic = new BackgroundMusic();
 
 export const setMusicTrack = (track: MusicTrack) => {
-  ambient.play(track);
+  backgroundMusic.setTrack(track);
 };
 
 export const stopMusic = () => {
-  ambient.stop();
+  backgroundMusic.stop();
 };
 
-// Pause/resume on backgrounding
+// Keep Web Audio effects unlocked and retry file playback on user gestures.
 if (typeof window !== "undefined") {
-  const onHide = () => ambient.handleVisibilityChange(true);
-  const onShow = () => ambient.handleVisibilityChange(false);
+  const unlock = () => {
+    getCtx();
+    backgroundMusic.refresh();
+  };
+  window.addEventListener("touchend", unlock, { passive: true });
+  window.addEventListener("pointerdown", unlock);
+
+  const onHide = () => backgroundMusic.handleVisibilityChange(true);
+  const onShow = () => backgroundMusic.handleVisibilityChange(false);
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) onHide();
     else onShow();

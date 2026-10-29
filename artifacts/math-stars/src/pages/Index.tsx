@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { SetupScreen } from "@/components/SetupScreen";
 import { PracticeSetupScreen } from "@/components/PracticeSetupScreen";
 import { GameScreen, GameResult } from "@/components/GameScreen";
@@ -192,16 +192,16 @@ const Index = () => {
     setHighScore(readNum(pkey(profileId, highScoreKey(operation, difficulty, timer)), 0));
   }, [profileId, operation, difficulty, timer]);
 
-  // Map screen -> background music track (gameplay screens stay silent)
-  useEffect(() => {
+  // Use one continuous menu track; gameplay pauses it before the next paint.
+  useLayoutEffect(() => {
     const map: Record<Screen, MusicTrack> = {
-      setup: "home",
-      classroom: "home",
-      practiceSetup: "learn",
-      learn: "learn",
-      adventure: "challenge",
-      calendar: "challenge",
-      results: "home",
+      setup: "carefree",
+      classroom: "carefree",
+      practiceSetup: "carefree",
+      learn: "carefree",
+      adventure: "carefree",
+      calendar: "carefree",
+      results: "carefree",
       game: null,
       practice: null,
       starChallenge: null,
