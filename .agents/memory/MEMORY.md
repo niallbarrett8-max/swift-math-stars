@@ -1,0 +1,1 @@
+- [Math Stars audio and challenge scope](math-stars-audio-and-challenge-scope.md) — preserve saved volumes; revised arithmetic ranges cover Daily awards and High Score Run, not regular or practice play.

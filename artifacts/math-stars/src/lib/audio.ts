@@ -102,6 +102,8 @@ const getNoise = (): AudioBuffer | null => {
 // ============================================================
 class BackgroundMusic {
   private player: HTMLAudioElement | null = null;
+  private musicSource: MediaElementAudioSourceNode | null = null;
+  private musicGain: GainNode | null = null;
   private currentTrack: MusicTrack = null;
   private pausedForGameplay = false;
   private hidden = false;
@@ -113,7 +115,6 @@ class BackgroundMusic {
       this.player.src = `${import.meta.env.BASE_URL}carefree.mp3`;
       this.player.loop = true;
       this.player.preload = "auto";
-      this.player.volume = this.musicVolume();
       this.player.addEventListener("error", () => {
         console.error("Failed to load Math Stars background music.", this.player?.error);
       });
@@ -125,21 +126,54 @@ class BackgroundMusic {
     return Math.max(0, Math.min(1, settings.musicVolume));
   }
 
-  private sync() {
-    if (this.player) this.player.volume = this.musicVolume();
-
-    if (
-      !settings.musicOn ||
-      !this.currentTrack ||
-      this.pausedForGameplay ||
-      this.hidden
-    ) {
-      this.player?.pause();
+  private syncVolume(player: HTMLAudioElement) {
+    const volume = this.musicVolume();
+    if (!ctx) {
+      player.volume = volume;
       return;
     }
 
-    const player = this.getPlayer();
-    if (!player || !player.paused) return;
+    try {
+      if (!this.musicSource) {
+        const source = ctx.createMediaElementSource(player);
+        const gain = ctx.createGain();
+        source.connect(gain);
+        gain.connect(ctx.destination);
+        this.musicSource = source;
+        this.musicGain = gain;
+      }
+
+      if (this.musicGain) {
+        // iOS Safari ignores HTMLMediaElement.volume; control only the music
+        // branch through Web Audio while leaving effects on their own route.
+        player.volume = 1;
+        this.musicGain.gain.setTargetAtTime(volume, ctx.currentTime, 0.015);
+        return;
+      }
+    } catch (error) {
+      console.error("Failed to initialize Math Stars music volume control.", error);
+    }
+
+    // Fallback for browsers without a usable Web Audio graph.
+    player.volume = volume;
+  }
+
+  private sync() {
+    const shouldPlay =
+      settings.musicOn &&
+      !!this.currentTrack &&
+      !this.pausedForGameplay &&
+      !this.hidden;
+    const player = this.player ?? (shouldPlay ? this.getPlayer() : null);
+    if (!player) return;
+
+    this.syncVolume(player);
+    if (!shouldPlay) {
+      player.pause();
+      return;
+    }
+
+    if (!player.paused) return;
 
     player.play().catch((error: unknown) => {
       if (
@@ -177,6 +211,9 @@ class BackgroundMusic {
 
   handleVisibilityChange(hidden: boolean) {
     this.hidden = hidden;
+    if (!hidden && ctx?.state === "suspended") {
+      ctx.resume().catch(() => {});
+    }
     this.sync();
   }
 }

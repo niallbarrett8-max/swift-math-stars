@@ -124,13 +124,22 @@ const buildAdventure = (diff: AdventureDifficulty): Question => {
   }
   if (op === "add") {
     const m = ADV_ADD_SUB_MAX[diff];
-    const a = rand(1, m),
-      b = rand(1, m);
+    if (diff === "easy") {
+      const a = rand(1, m);
+      const b = rand(1, m);
+      return { a, b, op, answer: a + b };
+    }
+
+    const largerRangeNumber = rand(1, m);
+    const singleDigitNumber = rand(1, 9);
+    const largerNumberFirst = Math.random() < 0.5;
+    const a = largerNumberFirst ? largerRangeNumber : singleDigitNumber;
+    const b = largerNumberFirst ? singleDigitNumber : largerRangeNumber;
     return { a, b, op, answer: a + b };
   }
   const m = ADV_ADD_SUB_MAX[diff];
   const a = rand(1, m);
-  const b = rand(1, a);
+  const b = diff === "easy" ? rand(1, a) : rand(1, Math.min(9, a));
   return { a, b, op, answer: a - b };
 };
 
