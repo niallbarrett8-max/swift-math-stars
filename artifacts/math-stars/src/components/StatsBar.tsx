@@ -31,7 +31,7 @@ const Stat = ({
 
 export const StatsBar = ({ score, accuracy, timeLeft, totalTime }: StatsBarProps) => {
   const pct = Math.max(0, Math.min(100, (timeLeft / totalTime) * 100));
-  const lowTime = timeLeft <= 10;
+  const lowTime = timeLeft <= 5;
 
   return (
     <div className="game-stats-bar w-full flex flex-col gap-1.5 sm:gap-2">
