@@ -105,11 +105,8 @@ export const ResultsScreen = ({
   )[targetScore as number];
 
   const celebrate =
-    isNewHighScore ||
-    targetReached ||
-    (practice && accuracy >= 90) ||
-    !!starEarned ||
-    (highScoreChallenge && isNewHighScore);
+  !!targetReached ||
+  !!starEarned;
 
   // Animate stats counting up from 0, then reveal buttons after a short delay.
   // Skip animation for practice sessions (no timer, no accidental-tap risk).
@@ -195,16 +192,12 @@ export const ResultsScreen = ({
                   className="h-24 w-24 object-contain"
                 />
               ) : (
-                <Star
-                  className="size-24"
-                  strokeWidth={1.5}
-                  style={{
-                    color: starEarned ? STAR_COLORS[starTier].stroke : "hsl(var(--muted-foreground) / 0.4)",
-                    fill: starEarned ? tierColor : "transparent",
-                    filter: starEarned ? `drop-shadow(0 4px 20px ${tierColor})` : undefined,
-                  }}
-                />
-              )}
+  <img
+    src="/images/billy-p/daily-challenge-keep-trying.png"
+    alt="Billy P encouraging the player to keep trying"
+    className="h-24 w-24 object-contain"
+  />
+)}
             </div>
           ) : highScoreChallenge ? (
             <img
@@ -252,7 +245,7 @@ export const ResultsScreen = ({
             <div className="text-xs sm:text-sm font-bold opacity-90 mt-1">CORRECT</div>
           </div>
           <div className="rounded-2xl gradient-secondary text-white p-4 shadow-soft">
-            <div className="text-3xl sm:text-4xl font-extrabold tabular-nums">{dispAccuracy}%</div>
+            <div className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tabular-nums whitespace-nowrap">{dispAccuracy}%</div>
             <div className="text-xs sm:text-sm font-bold opacity-90 mt-1">ACCURACY</div>
           </div>
           <div className="rounded-2xl gradient-accent text-white p-4 shadow-soft">

@@ -209,7 +209,7 @@ export const SetupScreen = ({
             data-testid="switch-target-score"
           />
         </div>
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-3">
+        <div className="grid grid-cols-3 gap-2 sm:gap-3">
           {TARGET_OPTIONS.map((t) => {
             const active = target === t.value;
             return (
