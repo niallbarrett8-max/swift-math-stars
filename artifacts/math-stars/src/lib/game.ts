@@ -196,9 +196,12 @@ export const starTimeKey = (date: string, tier: StarTier) => `adv.${date}.star.$
 // Per-difficulty star completion time — includes the adventure difficulty level.
 export const starTimeDiffKey = (date: string, diff: AdventureDifficulty, tier: StarTier) =>
   `adv.${date}.${diff}.star.${tier}`;
-// Best high-score (correct) and matching accuracy for a date.
-export const hsScoreKey = (date: string) => `adv.${date}.hs.score`;
-export const hsAccKey = (date: string) => `adv.${date}.hs.acc`;
+// Best 60-second score and accuracy, tracked separately by difficulty.
+export const hsScoreKey = (date: string, diff: AdventureDifficulty) =>
+  `adv.${date}.${diff}.hs.score`;
+
+export const hsAccKey = (date: string, diff: AdventureDifficulty) =>
+  `adv.${date}.${diff}.hs.acc`;
 
 // All-time unlock keys (tier earned at least once on this profile).
 export const tierUnlockedKey = (tier: StarTier) => `adv.unlocked.${tier}`;

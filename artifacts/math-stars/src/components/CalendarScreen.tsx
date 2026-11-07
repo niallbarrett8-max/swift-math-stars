@@ -91,8 +91,8 @@ export const CalendarScreen = ({ profileId, onBack }: CalendarScreenProps) => {
 
       <div className="space-y-2.5">
         {days.map((d) => {
-          const hs = readNum(pkey(profileId, hsScoreKey(d)));
-          const acc = readNum(pkey(profileId, hsAccKey(d)));
+
+
           const isToday = d === todayKey();
 
           const diffRows = DIFFICULTY_ORDER.map((diff) => ({
@@ -101,16 +101,19 @@ export const CalendarScreen = ({ profileId, onBack }: CalendarScreenProps) => {
               tier: t,
               time: readNum(pkey(profileId, starTimeDiffKey(d, diff, t))),
             })),
-          })).filter((row) => row.stars.some((s) => s.time !== null));
+            hs: readNum(pkey(profileId, hsScoreKey(d, diff))),
+            acc: readNum(pkey(profileId, hsAccKey(d, diff))),
+          })).filter(
+            (row) => row.stars.some((s) => s.time !== null) || row.hs !== null,
+          );
 
-          const anything = diffRows.length > 0 || hs !== null;
+          const anything = diffRows.length > 0;
 
           return (
             <div
               key={d}
-              className={`rounded-2xl bg-background border-4 ${
-                isToday ? "border-primary" : "border-border"
-              } p-3 sm:p-4`}
+              className={`rounded-2xl bg-background border-4 ${isToday ? "border-primary" : "border-border"
+                } p-3 sm:p-4`}
             >
               <div className="flex items-center justify-between mb-1.5">
                 <span className="font-extrabold text-sm sm:text-base">
@@ -124,7 +127,7 @@ export const CalendarScreen = ({ profileId, onBack }: CalendarScreenProps) => {
 
               {anything && (
                 <div className="space-y-1">
-                  {diffRows.map(({ diff, stars }) => {
+                  {diffRows.map(({ diff, stars, hs, acc }) => {
                     const earned = [...stars].reverse().find((s) => s.time !== null);
                     return (
                       <div key={diff} className="flex items-center gap-2">
@@ -144,23 +147,19 @@ export const CalendarScreen = ({ profileId, onBack }: CalendarScreenProps) => {
                             {fmtTime(earned.time!)}
                           </span>
                         )}
+                        {hs !== null && (
+                          <span className="text-[10px] font-bold ml-1">
+                            <Trophy className="size-3 inline text-accent" /> {hs} · 🎯 {acc ?? 0}%
+                          </span>
+                        )}
                       </div>
                     );
                   })}
 
-                  {hs !== null && (
-                    <div className="flex items-center gap-2 pt-0.5 mt-0.5 border-t border-border/50">
-                      <span className="w-9 text-[10px] font-extrabold text-muted-foreground shrink-0">
-                        Run
-                      </span>
-                      <span className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 bg-accent/15 text-[10px] font-bold">
-                        <Trophy className="size-3 text-accent" /> {hs}
-                      </span>
-                      <span className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 bg-secondary/15 text-[10px] font-bold">
-                        🎯 {acc ?? 0}%
-                      </span>
-                    </div>
-                  )}
+
+
+
+
                 </div>
               )}
             </div>

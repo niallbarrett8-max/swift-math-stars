@@ -273,11 +273,14 @@ const Index = () => {
       }
       setIsNewHigh(false);
     } else if (r.highScoreChallenge) {
-      const k = pkey(profileId, hsScoreKey(today));
+      const k = pkey(profileId, hsScoreKey(today, r.challenge ?? adventureDiff));
       const prev = readNum(k, 0);
       if (r.score > prev) {
         localStorage.setItem(k, String(r.score));
-        localStorage.setItem(pkey(profileId, hsAccKey(today)), String(r.accuracy));
+        localStorage.setItem(
+          pkey(profileId, hsAccKey(today, r.challenge ?? adventureDiff)),
+          String(r.accuracy),
+        );
         setIsNewHigh(true);
       } else {
         setIsNewHigh(false);
@@ -306,9 +309,8 @@ const Index = () => {
 
   return (
     <main
-      className={`min-h-screen w-full flex items-center justify-center p-4 sm:p-6 safe-pad ${
-        isGameplayScreen ? "game-viewport-shell" : ""
-      }`}
+      className={`min-h-screen w-full flex items-center justify-center p-4 sm:p-6 safe-pad ${isGameplayScreen ? "game-viewport-shell" : ""
+        }`}
     >
       {screen === "setup" && (
         <SetupScreen
@@ -445,12 +447,12 @@ const Index = () => {
           onContinue={
             result.targetReached && NEXT_TARGET[result.targetScore as TargetScore]
               ? () => {
-                  setTarget(NEXT_TARGET[result.targetScore as TargetScore]!);
-                  setContinueScore(0);
-                  setResult(null);
-                  setIsNewHigh(false);
-                  setScreen("game");
-                }
+                setTarget(NEXT_TARGET[result.targetScore as TargetScore]!);
+                setContinueScore(0);
+                setResult(null);
+                setIsNewHigh(false);
+                setScreen("game");
+              }
               : undefined
           }
           onPlayAgain={() => {
@@ -467,11 +469,11 @@ const Index = () => {
           onNextTier={
             result.starEarned && result.starTier
               ? () => {
-                  const diff = result.challenge ?? adventureDiff;
-                  if (result.starTier === "bronze") startStar(diff, "silver");
-                  else if (result.starTier === "silver") startStar(diff, "gold");
-                  else startHighScore(diff);
-                }
+                const diff = result.challenge ?? adventureDiff;
+                if (result.starTier === "bronze") startStar(diff, "silver");
+                else if (result.starTier === "silver") startStar(diff, "gold");
+                else startHighScore(diff);
+              }
               : undefined
           }
           onChooseAnother={

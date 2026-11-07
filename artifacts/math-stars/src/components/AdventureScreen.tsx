@@ -102,8 +102,8 @@ export const AdventureScreen = ({
   const today = todayKey();
   const [, force] = useState(0);
   // Read fresh on every render
-  const todayHs = readNum(pkey(profileId, hsScoreKey(today))) ?? 0;
-  const todayAcc = readNum(pkey(profileId, hsAccKey(today))) ?? 0;
+  const todayHs = readNum(pkey(profileId, hsScoreKey(today, difficulty))) ?? 0;
+  const todayAcc = readNum(pkey(profileId, hsAccKey(today, difficulty))) ?? 0;
 
   const starInfo = (tier: StarTier) => {
     const time = readNum(pkey(profileId, starTimeDiffKey(today, difficulty, tier)));
@@ -145,9 +145,8 @@ export const AdventureScreen = ({
                   onDifficultyChange(d.id);
                   force((n) => n + 1);
                 }}
-                className={`btn-3d ${d.cls} py-3 flex-col ${
-                  active ? "btn-3d-active-ring" : "opacity-75"
-                }`}
+                className={`btn-3d ${d.cls} py-3 flex-col ${active ? "btn-3d-active-ring" : "opacity-75"
+                  }`}
               >
                 <span className="font-extrabold">{d.label}</span>
                 <span className="text-[10px] opacity-90">{d.sub}</span>
@@ -172,9 +171,8 @@ export const AdventureScreen = ({
                 key={tier}
                 onClick={() => { if (info.unlocked) { playClick(); onStartStar(difficulty, tier); } }}
                 disabled={!info.unlocked}
-                className={`btn-3d ${
-                  info.unlocked ? "btn-3d-neutral" : ""
-                } w-full !justify-between p-4 text-left ${!info.unlocked ? "opacity-60" : ""}`}
+                className={`btn-3d ${info.unlocked ? "btn-3d-neutral" : ""
+                  } w-full !justify-between p-4 text-left ${!info.unlocked ? "opacity-60" : ""}`}
               >
                 <div className="flex items-center gap-3">
                   <TierStar tier={tier} earned={info.earnedToday} size={32} />
