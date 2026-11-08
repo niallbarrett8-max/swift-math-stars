@@ -303,6 +303,10 @@ export const GameScreen = ({
 
   const totalPractice = practiceSet.current.length;
   const pct = isPractice ? Math.round((practiceIdx / totalPractice) * 100) : 0;
+  const targetPct =
+    !isEndlessTarget && typeof targetScore === "number" && targetScore > 0
+      ? Math.min(100, (score / targetScore) * 100)
+      : 0;
   const starGoal = isStar ? STAR_GOALS[starTier!] : 0;
   const tierColor = isStar ? STAR_COLORS[starTier!].fill : undefined;
 
@@ -353,16 +357,32 @@ export const GameScreen = ({
             </span>
             <span>Score: <span className="text-gradient">{score}</span></span>
             <span>Accuracy: <span className="text-gradient">{calcAccuracy(score, score + wrong)}%</span></span>
-            {!isEndlessTarget && typeof targetScore === "number" && (
-              <span>
-                Target: <span className="text-gradient">{score} / {targetScore}</span>
-              </span>
-            )}
+
             <span className="inline-flex items-center gap-1">
               <Flame className="size-4 text-accent" /> {streak}
             </span>
-            <span className="text-muted-foreground">Answered: {score + wrong}</span>
+
           </div>
+
+          {!isEndlessTarget && typeof targetScore === "number" && (
+            <div className="mt-3 space-y-1.5">
+              <div className="flex justify-between text-sm font-extrabold">
+                <span>Target Progress</span>
+                <span className="text-gradient">{score} / {targetScore}</span>
+              </div>
+              <div className="h-2.5 w-full bg-muted rounded-full overflow-hidden">
+                <div
+                  className="h-full gradient-primary rounded-full transition-all"
+                  style={{ width: `${targetPct}%` }}
+                  role="progressbar"
+                  aria-label="Target progress"
+                  aria-valuenow={score}
+                  aria-valuemin={0}
+                  aria-valuemax={targetScore}
+                />
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         <div className="game-status-block">
